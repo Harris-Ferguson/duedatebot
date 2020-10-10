@@ -24,12 +24,7 @@ bot = commands.Bot(command_prefix='@')
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.CheckFailure):
-        await ctx.send("```Someone is trying something illegal! (you need admin for this command)```")
-
-@bot.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: name arg2: class arg3: date due format: MON D YYYY EXAMPLE: Jun 1 2020")
+@bot.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: class arg2: name arg3: date due format: MON D YYYY EXAMPLE: Jun 1 2020")
 @commands.has_role("admin")
 async def duedate(ctx, arg1, arg2, arg3, *arg4):
     duedatetime = datetime.strptime(arg3, '%b%d%Y')
@@ -49,8 +44,8 @@ async def duedate(ctx, arg1, arg2, arg3, *arg4):
     #add the new assignment to the database
     post_data = {
         'guild': guild,
-        'name': arg1,
-        'class': arg2,
+        'name': arg2,
+        'class': arg1,
         'a_id': a_id,
         'duedate': duedatetime,
         'handins': handins
@@ -62,7 +57,7 @@ async def duedate(ctx, arg1, arg2, arg3, *arg4):
     for handin in handins:
         handinstring += "-" + handin + "\n"
 
-    await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins: " + handinstring + "\n Assignment ID: " + str(a_id) + "\n```" )
+    await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins:\n " + handinstring + "\n Assignment ID: " + str(a_id) + "\n```" )
 
 @bot.command(name="dates", help="Lists all due dates")
 async def listalldue(ctx):
@@ -96,17 +91,25 @@ async def todaydue(ctx):
         await ctx.send(date)
 
 @bot.command(name="addhandins", help="allows you to add a list of hand ins to a given due date item")
-async def addhandin(ctx, arg1, *arg2):
+async def addhandin(ctx, arg1: int, *arg2):
     if len(arg2) is 0:
-        await ctx.send("You didn't give any new hand-ins to add!")
+        await ctx.send("```You didn't give any new hand-ins to add!```")
         return
-    else:
-        guild = ctx.guild.id
-        handins = []
-        for arg in arg2:
-            handins.append(arg)
-        collection.update_one({"a_id": arg1}, {"$set":{"handins":handins}})
-        for post in collections.find({"guild": guild, "a_id":arg2}):
-            await ctx.send(helpers.build_output_string(post))
+    guild = ctx.guild.id
+    handins = []
+    db_handins = []
+
+    for post in collection.find({"guild":guild}):
+        if post["a_id"] == arg1:
+            db_handins = post['handins']
+            for handin in db_handins:
+                handins.append(handin)
+            for arg in arg2:
+                if arg not in db_handins:
+                    handins.append(arg)
+            collection.update_one({"a_id":arg1}, {"$set":{"handins":handins}})
+    await ctx.send("updated!")
+    #show the update object
+    # we should implement a show-assignment button
 
 bot.run(TOKEN)
