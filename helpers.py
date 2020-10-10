@@ -13,4 +13,4 @@ def build_output_string(post):
     for handin in handins:
         h = h + "-" + handin + "\n"
 
-    return "```\n" + post["class"] + "\n" + post["name"] + "\nDue On: " + post["duedate"].strftime('%b %d %Y') + "\nHand-Ins:\n" + h + "```"
+    return "```\nAssignment ID: " + str(post["a_id"]) + "\n" + post["class"] + "\n" + post["name"] + "\nDue On: " + post["duedate"].strftime('%b %d %Y') + "\nHand-Ins:\n" + h + "```"

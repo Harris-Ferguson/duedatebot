@@ -6,6 +6,7 @@ from pymongo import MongoClient
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import hashlib
 
 import helpers
 
@@ -33,31 +34,35 @@ async def on_command_error(ctx, error):
 async def duedate(ctx, arg1, arg2, arg3, *arg4):
     duedatetime = datetime.strptime(arg3, '%b%d%Y')
     guild = ctx.guild.id
-    handins = []
 
+    #Generate the handins list
+    handins = []
     if len(arg4) is 0:
         handins.append("None!")
     else:
         for arg in arg4:
             handins.append(arg)
 
-    print("Hello")
+    #Generate the assignment id of 4 digits by hashing the assignment name
+    a_id = int(hashlib.sha256(arg1.encode('utf-8')).hexdigest(), 16) % 10**4
+
+    #add the new assignment to the database
     post_data = {
         'guild': guild,
         'name': arg1,
         'class': arg2,
+        'a_id': a_id,
         'duedate': duedatetime,
         'handins': handins
     }
     result = collection.insert_one(post_data)
     print('One post:{0}'.format(result.inserted_id))
 
-    #this builds a string for the handins, this could probably be a list comprehension but I'm too lazy
     handinstring = ""
     for handin in handins:
-        handinstring += handin + " "
+        handinstring += "-" + handin + "\n"
 
-    await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins: " + handinstring + "```")
+    await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins: " + handinstring + "\n Assignment ID: " + str(a_id) + "\n```" )
 
 @bot.command(name="dates", help="Lists all due dates")
 async def listalldue(ctx):
@@ -89,5 +94,19 @@ async def todaydue(ctx):
 
     for date in dates:
         await ctx.send(date)
+
+@bot.command(name="addhandins", help="allows you to add a list of hand ins to a given due date item")
+async def addhandin(ctx, arg1, *arg2):
+    if len(arg2) is 0:
+        await ctx.send("You didn't give any new hand-ins to add!")
+        return
+    else:
+        guild = ctx.guild.id
+        handins = []
+        for arg in arg2:
+            handins.append(arg)
+        collection.update_one({"a_id": arg1}, {"$set":{"handins":handins}})
+        for post in collections.find({"guild": guild, "a_id":arg2}):
+            await ctx.send(helpers.build_output_string(post))
 
 bot.run(TOKEN)
