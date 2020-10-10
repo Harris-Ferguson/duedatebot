@@ -120,8 +120,7 @@ async def addhandin(ctx, arg1: int, *arg2):
                 if arg not in db_handins:
                     handins.append(arg)
             collection.update_one({"a_id":arg1}, {"$set":{"handins":handins}})
-            await ctx.send("updated!")
-            await ctx.send(helpers.build_output_string(post))
+            await ctx.send("```updated! Handins are now " + str(handins) + " to handins for "+ post["class"] +" " + post["name"]+ "\n```")
 
 
 @bot.command(name="daystilldue", help="returns how long till the given assignment is due. arg1: class, arg2: name")
