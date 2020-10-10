@@ -24,10 +24,19 @@ bot = commands.Bot(command_prefix='@')
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
-@bot.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: class arg2: name arg3: date due format: MON D YYYY EXAMPLE: Jun 1 2020")
+@bot.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: class arg2: name arg3: date due format: MON D YYYY HH:MM EXAMPLE: Jun 1 2020 18:02 (time is optional)")
 @commands.has_role("admin")
 async def duedate(ctx, arg1, arg2, arg3, *arg4):
-    duedatetime = datetime.strptime(arg3, '%b%d%Y')
+    # this is pretty sloppy, ideally we should abstract this behaviour and use regex but this try catch works for now
+    try:
+        duedatetime = datetime.strptime(arg3, '%b %d %Y %H:%S')
+    except ValueError:
+        try:
+            duedatetime = datetime.strptime(arg3, '%b %d %Y')
+        except:
+            await ctx.send("Due date could not be parsed")
+            return
+
     guild = ctx.guild.id
 
     #Generate the handins list
