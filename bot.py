@@ -17,7 +17,6 @@ collection = db["duedates"]
 
 bot = commands.Bot(command_prefix='!')
 
-
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
@@ -42,6 +41,15 @@ async def duedate(ctx, arg1, arg2, arg3):
 async def listdue(ctx):
     dates = []
     for post in collection.find():
+        dates.append(post["class"] + " " + post["name"] + " Due On: " + post["duedate"].strftime('%b %d %Y'))
+
+    for date in dates:
+        await ctx.send(date)
+
+@bot.command(name="datesforclass", help="Lists all the due dates for a specified course")
+async def listdue(ctx, arg1):
+    dates = []
+    for post in collection.find({"class":arg1}):
         dates.append(post["class"] + " " + post["name"] + " Due On: " + post["duedate"].strftime('%b %d %Y'))
 
     for date in dates:
