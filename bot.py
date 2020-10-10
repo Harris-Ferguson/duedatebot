@@ -124,4 +124,12 @@ async def days_till_due(ctx, arg1, arg2):
             else:
                 await ctx.send("```\nDue in: " + str(timetilldue.days) + " Days! \n```")
 
+@bot.command(name="show", help="prints out the details of a specific assignment. arg1: class arg2: name")
+async def show_assign(ctx, arg1, arg2):
+    guild = ctx.guild.id
+    for post in collection.find({"guild":guild}):
+        if post["name"] == arg2 and post["class"] == arg1:
+            await ctx.send(helpers.build_output_string(post))
+
+
 bot.run(TOKEN)
