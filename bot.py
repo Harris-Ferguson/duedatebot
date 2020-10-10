@@ -7,6 +7,8 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
+import helpers
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 DBPASS = os.getenv('DB_PASS')
@@ -20,8 +22,6 @@ bot = commands.Bot(command_prefix='@')
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
-    for guild in bot.guilds:
-        print(guild.id)
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -34,37 +34,47 @@ async def duedate(ctx, arg1, arg2, arg3, *arg4):
     duedatetime = datetime.strptime(arg3, '%b%d%Y')
     guild = ctx.guild.id
     handins = []
-    for arg in arg4:
-        handins.append(arg)
-        print(arg)
 
+    if len(arg4) is 0:
+        handins.append("None!")
+    else:
+        for arg in arg4:
+            handins.append(arg)
+
+    print("Hello")
     post_data = {
         'guild': guild,
         'name': arg1,
         'class': arg2,
         'duedate': duedatetime,
-        'handin': handins
+        'handins': handins
     }
     result = collection.insert_one(post_data)
     print('One post:{0}'.format(result.inserted_id))
-    await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "```")
+
+    #this builds a string for the handins, this could probably be a list comprehension but I'm too lazy
+    handinstring = ""
+    for handin in handins:
+        handinstring += handin + " "
+
+    await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins: " + handinstring + "```")
 
 @bot.command(name="dates", help="Lists all due dates")
-async def listdue(ctx):
+async def listalldue(ctx):
     dates = []
     guild = ctx.guild.id
     for post in collection.find({"guild": guild}):
-        dates.append("```" + post["class"] + " " + post["name"] + " Due On: " + post["duedate"].strftime('%b %d %Y') + "```")
+        dates.append(helpers.build_output_string(post))
 
     for date in dates:
         await ctx.send(date)
 
 @bot.command(name="datesforclass", help="Lists all the due dates for a specified course")
-async def listdue(ctx, arg1):
+async def listduefor(ctx, arg1):
     dates = []
     guild = ctx.guild.id
     for post in collection.find({"guild": guild ,"class":arg1}):
-        dates.append("```" + post["class"] + " " + post["name"] + " Due On: " + post["duedate"].strftime('%b %d %Y') + "```")
+        dates.append(helpers.build_output_string(post))
 
     for date in dates:
         await ctx.send(date)
@@ -75,7 +85,7 @@ async def todaydue(ctx):
     guild = ctx.guild.id
     for post in collection.find({"guild": guild}):
         if post["duedate"].date() == datetime.today().date():
-            dates.append("```" + post["class"] + " " + post["name"] + " Due On: " + post["duedate"].strftime('%b %d %Y') + "```")
+            dates.append(helpers.build_output_string(post))
 
     for date in dates:
         await ctx.send(date)
