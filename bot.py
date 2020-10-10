@@ -112,14 +112,17 @@ async def addhandin(ctx, arg1: int, *arg2):
         if post["a_id"] == arg1:
             db_handins = post['handins']
             for handin in db_handins:
-                handins.append(handin)
+                if handin == "None!":
+                    pass
+                else:
+                    handins.append(handin)
             for arg in arg2:
                 if arg not in db_handins:
                     handins.append(arg)
             collection.update_one({"a_id":arg1}, {"$set":{"handins":handins}})
-    await ctx.send("updated!")
-    #show the update object
-    # we should implement a show-assignment button
+            await ctx.send("updated!")
+            await ctx.send(helpers.build_output_string(post))
+
 
 @bot.command(name="daystilldue", help="returns how long till the given assignment is due. arg1: class, arg2: name")
 async def days_till_due(ctx, arg1, arg2):
