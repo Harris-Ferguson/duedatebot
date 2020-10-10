@@ -30,15 +30,20 @@ async def on_command_error(ctx, error):
 
 @bot.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: name arg2: class arg3: date due format: MON D YYYY EXAMPLE: Jun 1 2020")
 @commands.has_role("admin")
-async def duedate(ctx, arg1, arg2, arg3):
+async def duedate(ctx, arg1, arg2, arg3, *arg4):
     duedatetime = datetime.strptime(arg3, '%b%d%Y')
     guild = ctx.guild.id
-    print(guild)
+    handins = []
+    for arg in arg4:
+        handins.append(arg)
+        print(arg)
+
     post_data = {
         'guild': guild,
         'name': arg1,
         'class': arg2,
-        'duedate': duedatetime
+        'duedate': duedatetime,
+        'handin': handins
     }
     result = collection.insert_one(post_data)
     print('One post:{0}'.format(result.inserted_id))
@@ -54,7 +59,7 @@ async def listdue(ctx):
     for date in dates:
         await ctx.send(date)
 
-@bot.command(name="datesfor", help="Lists all the due dates for a specified course")
+@bot.command(name="datesforclass", help="Lists all the due dates for a specified course")
 async def listdue(ctx, arg1):
     dates = []
     guild = ctx.guild.id
