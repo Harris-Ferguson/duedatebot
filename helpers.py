@@ -1,3 +1,6 @@
+"""
+Helper functions for the bot
+"""
 from datetime import datetime
 
 def build_output_string(post):

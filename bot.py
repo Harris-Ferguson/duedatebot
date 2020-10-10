@@ -112,4 +112,16 @@ async def addhandin(ctx, arg1: int, *arg2):
     #show the update object
     # we should implement a show-assignment button
 
+@bot.command(name="daystilldue", help="returns how long till the given assignment is due. arg1: class, arg2: name")
+async def days_till_due(ctx, arg1, arg2):
+    guild = ctx.guild.id
+    for post in collection.find({"guild":guild}):
+        if post["name"] == arg2 and post["class"] == arg1:
+            timetilldue = post["duedate"] - datetime.now()
+            await ctx.send(helpers.build_output_string(post))
+            if timetilldue.days <= 0:
+                await ctx.send("```\nDue Today at: " + post["duedate"].strftime("%I:%M%p") +"\n```")
+            else:
+                await ctx.send("```\nDue in: " + str(timetilldue.days) + " Days! \n```")
+
 bot.run(TOKEN)
