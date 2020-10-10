@@ -39,9 +39,11 @@ async def duedate(ctx, arg1, arg2, arg3):
 
 @bot.command(name="list-due-dates", help="Lists all due dates")
 async def listdue(ctx):
-    duedates = []
+    dates = []
     for post in collection.find():
+        dates.append(post["name"] + " " + post["class"] + " " + post["duedate"])
 
-
+    for date in dates:
+        await ctx.send(date)
 
 bot.run(TOKEN)
