@@ -67,7 +67,7 @@ class DueDatesCog(commands.Cog):
         for handin in handins:
             handinstring += "-" + handin + "\n"
 
-        await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins:\n " + handinstring + "\nAssignment ID: " + str(a_id) + "\n```" )
+        await ctx.send("```Added Due Date for: " + arg2 + "\nClass:  " + arg1 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins:\n " + handinstring + "\nAssignment ID: " + str(a_id) + "\n```" )
 
     @commands.command(name="dates", help="Lists all due dates")
     async def listalldue(self, ctx):
