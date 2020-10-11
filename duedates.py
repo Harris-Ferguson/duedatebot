@@ -212,11 +212,26 @@ class DueDatesCog(commands.Cog):
             "channel":channel,
             "time":futuretime,
             "interval":arg1,
+            "unit":arg2,
             "name":arg3
         }
         result = reminders.insert_one(reminder_data)
         print('One post:{0}'.format(result.inserted_id))
         await ctx.send("```\nAdded Reminder " + arg3 + " for every " + str(arg1) + " " + arg2 + "\n```")
+
+    @commands.command(name="removereminders", help="removes all reminders")
+    async def remove_reminders(self, ctx):
+        guild = ctx.guild.id
+        for reminder in reminders.find({"guild":guild}):
+            reminders.delete_one({"name":reminder["name"]})
+        await ctx.send("```\nRemoved all reminders!\n```")
+
+    @commands.command(name="listreminders", help="lists all reminders")
+    async def list_reminders(self, ctx):
+        guild = ctx.guild.id
+        for reminder in reminders.find({"guild":guild}):
+            await ctx.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
+            str(reminder["interval"]) +" " + reminder["unit"] +"\nTo Channel:" + ctx.guild.get_channel(reminder["channel"]).name + "\n```")
 
     async def reminders(self):
         while self is self.bot.get_cog("DueDatesCog"):
@@ -233,7 +248,13 @@ class DueDatesCog(commands.Cog):
                         for post in collection.find({"guild":reminder["guild"]}):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
-                            futuretime = int(currenttime + (reminder["interval"] * 86400))
+                            quantity_multiplier = 1
+                            if "Days" in arg2 or "days" in post["unit"]:
+                                quantity_multiplier = 86400
+                            #seconds is here for testing
+                            if "Seconds" in arg2 or "seconds" in post["unit"]:
+                                quantity_multiplier = 1
+                            futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
                         reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
             await asyncio.sleep(10)
 
