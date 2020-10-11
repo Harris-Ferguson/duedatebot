@@ -91,7 +91,7 @@ class DueDatesCog(commands.Cog):
             await ctx.send(date)
 
     @commands.command(name="duetoday", help="Lists everything due today")
-    async def todaydue(ctx):
+    async def todaydue(self, ctx):
         dates = []
         guild = ctx.guild.id
         for post in collection.find({"guild": guild}):
