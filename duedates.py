@@ -7,14 +7,15 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import hashlib
+import asyncio
 
 import helpers
 
 DBPASS = os.getenv('DB_PASS')
-
 cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
 db = cluster["duedates"]
 collection = db["duedates"]
+reminders = db["reminders"]
 
 class DueDatesCog(commands.Cog):
 
@@ -193,5 +194,25 @@ class DueDatesCog(commands.Cog):
             if post["name"] == arg2 and post["class"] == arg1:
                 await ctx.send(helpers.build_output_string(post))
 
+    @commands.command(name="setreminder", help="set a timed reminder for all assignments\narg1: (int) time interval in days \narg2: name of the reminder")
+    async def set_reminder(self, ctx, arg1: int, arg2):
+        guild = ctx.guild.id
+        reminder_data = {
+            "guild":guild,
+            "time":arg1,
+            "name":arg2
+        }
+        result = reminders.insert_one(reminder_data)
+        print('One post:{0}'.format(result.inserted_id))
+        await ctx.send("```\nAdded Reminder " + arg2 + " for every " + str(arg1) + " Days!\n```")
+
+    async def reminders(self):
+        for post in collection.find():
+            pass
+        await asyncio.sleep(10)
+
 def setup(bot):
-    bot.add_cog(DueDatesCog(bot))
+    b = DueDatesCog(bot)
+    eloop = asyncio.get_event_loop()
+    eloop.create_task(b.reminders())
+    bot.add_cog(b)
