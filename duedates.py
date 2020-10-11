@@ -48,8 +48,9 @@ class DueDatesCog(commands.Cog):
             for arg in arg4:
                 handins.append(arg)
 
+        s = arg1 + arg2 + guild
         #Generate the assignment id of 4 digits by hashing the assignment name
-        a_id = int(hashlib.sha256(arg1.encode('utf-8')).hexdigest(), 16) % 10**4
+        a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**4
 
         #add the new assignment to the database
         post_data = {
