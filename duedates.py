@@ -12,7 +12,7 @@ import helpers
 
 DBPASS = os.getenv('DB_PASS')
 
-cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/<dbname>?retryWrites=true&w=majority")
+cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
 db = cluster["duedates"]
 collection = db["duedates"]
 
