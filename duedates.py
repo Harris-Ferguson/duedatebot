@@ -122,8 +122,9 @@ class DueDatesCog(commands.Cog):
                 for arg in arg2:
                     if arg not in db_handins:
                         handins.append(arg)
-                collection.update_one({"a_id":arg1}, {"$set":{"handins":handins}})
-                await ctx.send("```updated! Handins are now " + str(handins) + " to handins for "+ post["class"] +" " + post["name"]+ "\n```")
+                collection.update_one({"a_id":arg1, "guild":guild}, {"$set":{"handins":handins}})
+        for post in collection.find({"guild":guild, "a_id":arg1}):
+            await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
     @commands.command(name="delete", help="Deletes an assigment by id \narg1: Assigment ID")
     @commands.has_permissions(administrator=True)
