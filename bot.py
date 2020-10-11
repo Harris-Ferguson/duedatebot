@@ -23,6 +23,8 @@ if __name__ == '__main__':
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+    for guild in bot.guilds:
+        print(guild.name + ": " + str(guild.id))
 
 
 bot.run(TOKEN)

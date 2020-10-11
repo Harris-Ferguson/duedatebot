@@ -1,6 +1,7 @@
 import os
 import pymongo
 from datetime import datetime
+import time
 import json
 from pymongo import MongoClient
 import discord
@@ -194,22 +195,47 @@ class DueDatesCog(commands.Cog):
             if post["name"] == arg2 and post["class"] == arg1:
                 await ctx.send(helpers.build_output_string(post))
 
-    @commands.command(name="setreminder", help="set a timed reminder for all assignments\narg1: (int) time interval in days \narg2: name of the reminder")
-    async def set_reminder(self, ctx, arg1: int, arg2):
+    @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder")
+    async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
         guild = ctx.guild.id
+        channel = ctx.channel.id
+        quantity_multiplier = 1
+        if "Days" in arg2 or "days" in arg2:
+            quantity_multiplier = 86400
+        #seconds is here for testing
+        if "Seconds" in arg2 or "seconds" in arg2:
+            quantity_multiplier = 1
+
+        futuretime = int(time.time() + (arg1 * quantity_multiplier))
         reminder_data = {
             "guild":guild,
-            "time":arg1,
-            "name":arg2
+            "channel":channel,
+            "time":futuretime,
+            "interval":arg1,
+            "name":arg3
         }
         result = reminders.insert_one(reminder_data)
         print('One post:{0}'.format(result.inserted_id))
-        await ctx.send("```\nAdded Reminder " + arg2 + " for every " + str(arg1) + " Days!\n```")
+        await ctx.send("```\nAdded Reminder " + arg3 + " for every " + str(arg1) + " " + arg2 + "\n```")
 
     async def reminders(self):
-        for post in collection.find():
-            pass
-        await asyncio.sleep(10)
+        while self is self.bot.get_cog("DueDatesCog"):
+            currenttime = time.time()
+            print("here!")
+            # only do this if we are connected!
+            if self.bot.guilds:
+                for reminder in reminders.find():
+                    # check if the reminder time is in the past
+                    if reminder["time"] <= currenttime:
+                        guild = self.bot.get_guild(reminder["guild"])
+                        channel = guild.get_channel(reminder["channel"])
+                        await channel.send("```\nReminder!\n```")
+                        for post in collection.find({"guild":reminder["guild"]}):
+                            await channel.send(helpers.build_output_string(post))
+                            # now reset the reminder
+                            futuretime = int(currenttime + (reminder["interval"] * 86400))
+                        reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
+            await asyncio.sleep(10)
 
 def setup(bot):
     b = DueDatesCog(bot)
