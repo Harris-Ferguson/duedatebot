@@ -18,7 +18,7 @@ class StudyGroupCog(commands.Cog):
             emojis = ctx.guild.emojis
             mikes = []
             for emoji in emojis:
-                if emoji.name in "Mike" or emoji.name == "HolUp":
+                if "Mike" in emoji.name or emoji.name == "HolUp":
                     mikes.append(emoji)
             pick = random.randint(0,len(mikes))
             await ctx.send(str(mikes[pick]))
