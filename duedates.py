@@ -27,7 +27,6 @@ class DueDatesCog(commands.Cog):
             await ctx.send("```\n you dont have the role for this command!\n```")
 
     @commands.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: class \narg2: name \narg3: date due format: MON D YYYY HH:MM \nEXAMPLE: Jun 1 2020 18:02 (time is optional)")
-    @commands.has_permissions(administrator=True)
     async def duedate(self, ctx, arg1, arg2, arg3, *arg4):
         # this is pretty sloppy, ideally we should abstract this behaviour and use regex but this try catch works for now
         try:
@@ -102,7 +101,6 @@ class DueDatesCog(commands.Cog):
             await ctx.send(date)
 
     @commands.command(name="addhandins", help="allows you to add a list of hand ins to a given due date item\narg1: Assignment ID\nArg2: Hand-ins to add")
-    @commands.has_permissions(administrator=True)
     async def addhandin(self, ctx, arg1: int, *arg2):
         if len(arg2) is 0:
             await ctx.send("```You didn't give any new hand-ins to add!```")
@@ -127,14 +125,12 @@ class DueDatesCog(commands.Cog):
             await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
     @commands.command(name="delete", help="Deletes an assigment by id \narg1: Assigment ID")
-    @commands.has_permissions(administrator=True)
     async def remove_hand_in(self, ctx, arg1: int):
         guild = ctx.guild.id
         collection.delete_one({"guild":guild, "a_id":arg1})
         await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
 
     @commands.command(name="deletepastdue", help="Deletes all assignments that are past due")
-    @commands.has_permissions(administrator=True)
     async def remove_past_due(self, ctx):
         guild = ctx.guild.id
         for post in collection.find({"guild":guild}):
@@ -144,7 +140,6 @@ class DueDatesCog(commands.Cog):
                 collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
 
     @commands.command(name="changeduedate", help="Changes the due date of an assigment \narg1: assigment id \narg2: new date with format: MON D YYYY HH:MM \nEXAMPLE: Jun 1 2020 18:02 (time is optional)" )
-    @commands.has_permissions(administrator=True)
     async def change_due_date(self, ctx, arg1: int, arg2):
         guild = ctx.guild.id
         try:
