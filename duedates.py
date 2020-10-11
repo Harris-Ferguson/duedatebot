@@ -136,6 +136,22 @@ class DueDatesCog(commands.Cog):
                 await ctx.send("Deleted: " + post["class"] + " " + post["name"])
                 collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
 
+    @commands.command(name="changeduedate", help="Changes the due date of an assigment arg1: assigment id arg2: new date with format: MON D YYYY HH:MM EXAMPLE: Jun 1 2020 18:02 (time is optional)" )
+    @commands.has_permissions(administrator=True)
+    async def change_due_date(self, ctx, arg1: int, arg2):
+        guild = ctx.guild.id
+        try:
+            duedatetime = datetime.strptime(arg2, '%b %d %Y %H:%S')
+        except ValueError:
+            try:
+                duedatetime = datetime.strptime(arg2, '%b %d %Y')
+            except:
+                await ctx.send("Due date could not be parsed")
+                return
+
+        collection.update_one({"a_id":arg1, "guild":guild}, {"$set":{"duedate":duedatetime}})
+        for post in collection.find({"guild":guild, "a_id":arg1}):
+            await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
     @commands.command(name="daystilldue", help="returns how long till the given assignment is due. arg1: class, arg2: name")
     async def days_till_due(self, ctx, arg1, arg2):
