@@ -17,9 +17,14 @@ db = cluster["duedates"]
 collection = db["duedates"]
 
 class DueDatesCog(commands.Cog):
-    
+
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.error.CheckFailure):
+            await ctx.send("```\n you dont have the role for this command!\n```")
 
     @commands.command(name="adddate", help="Adds a due date to the list of due dates.\n arg1: class arg2: name arg3: date due format: MON D YYYY HH:MM EXAMPLE: Jun 1 2020 18:02 (time is optional)")
     @commands.has_permissions(administrator=True)
