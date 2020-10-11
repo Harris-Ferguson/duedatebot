@@ -159,6 +159,14 @@ class DueDatesCog(commands.Cog):
         for post in collection.find({"guild":guild, "a_id":arg1}):
             await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
+    @commands.command(name="clearhandins", help="clears the hand ins for a given assigment \narg1: assignment id")
+    async def clear_handins(self, ctx, arg1: int):
+        guild = ctx.guild.id
+        emptyduelist = ["None!"]
+        collection.update_one({"guild":guild, "a_id":arg1}, {"$set":{"handins":emptyduelist}})
+        for post in collection.find({"guild":guild, "a_id":arg1}):
+            await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
+
     @commands.command(name="daystilldue", help="returns how long till the given assignment is due. \narg1: class \narg2: name")
     async def days_till_due(self, ctx, arg1, arg2):
         guild = ctx.guild.id
