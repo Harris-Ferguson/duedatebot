@@ -15,7 +15,7 @@ class StudyGroupCog(commands.Cog):
     async def mike(self, ctx):
         guildname = ctx.guild.name
         if guildname == "CMPT Study Groups":
-            emojis = guild.emojis
+            emojis = ctx.guild.emojis
             mikes = []
             for emoji in emojis:
                 if emoji.name.contains("Mike") or emoji.name == "HolUp":
