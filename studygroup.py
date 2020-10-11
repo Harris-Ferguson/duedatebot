@@ -21,7 +21,7 @@ class StudyGroupCog(commands.Cog):
                 if emoji.name in "Mike" or emoji.name == "HolUp":
                     mikes.append(emoji)
             pick = random.randint(0,len(mikes))
-            await ctx.send(str(mikes[pic]))
+            await ctx.send(str(mikes[pick]))
             return
 
 def setup(bot):
