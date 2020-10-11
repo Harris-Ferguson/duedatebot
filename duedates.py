@@ -156,6 +156,15 @@ class DueDatesCog(commands.Cog):
         for post in collection.find({"guild":guild, "a_id":arg1}):
             await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
+    @commands.command(name="duethisweek", help="Lists everything due in the next seven days")
+    async def due_this_week(self, ctx):
+        guild = ctx.guild.id
+        time = ctx.message.created_at
+        for post in collection.find({"guild":guild}):
+            timetilldue = post["duedate"] - time
+            if timetilldue.days <= 7:
+                await ctx.send(helpers.build_output_string(post))
+
     @commands.command(name="clearhandins", help="clears the hand ins for a given assigment \narg1: assignment id")
     async def clear_handins(self, ctx, arg1: int):
         guild = ctx.guild.id
