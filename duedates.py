@@ -62,7 +62,7 @@ class DueDatesCog(commands.Cog):
         for handin in handins:
             handinstring += "-" + handin + "\n"
 
-        await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins:\n " + handinstring + "\n Assignment ID: " + str(a_id) + "\n```" )
+        await ctx.send("```Added Due Date for: " + arg1 + "\nClass:  " + arg2 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins:\n " + handinstring + "\nAssignment ID: " + str(a_id) + "\n```" )
 
     @commands.command(name="dates", help="Lists all due dates")
     async def listalldue(self, ctx):
@@ -125,6 +125,17 @@ class DueDatesCog(commands.Cog):
         guild = ctx.guild.id
         collection.delete_one({"guild":guild, "a_id":arg1})
         await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
+
+    @commands.command(name="deletepastdue", help="Deletes all assignments that are past due")
+    @commands.has_permissions(administrator=True)
+    async def remove_past_due(self, ctx):
+        guild = ctx.guild.id
+        for post in collection.find({"guild":guild}):
+            timedel = post["duedate"] - datetime.now()
+            if timedel.days < 0:
+                await ctx.send("Deleted: " + post["class"] + " " + post["name"])
+                collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
+
 
     @commands.command(name="daystilldue", help="returns how long till the given assignment is due. arg1: class, arg2: name")
     async def days_till_due(self, ctx, arg1, arg2):
