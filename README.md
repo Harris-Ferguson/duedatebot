@@ -19,5 +19,6 @@ We also need people for a few other thing:
  - Writing better help messages
  - Writing more interesting reply messaages
  - Coming up with ideas for commands 
+ - Adding command Aliases
  
 Check out Issues for stuff you can help out with!
