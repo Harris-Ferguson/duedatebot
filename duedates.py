@@ -248,7 +248,7 @@ class DueDatesCog(commands.Cog):
                         for post in collection.find({"guild":reminder["guild"]}):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
-                            quantity_multiplier =
+                            quantity_multiplier = 1
                             if "Days" in reminder["unit"] or "days" in reminder["unit"]:
                                 quantity_multiplier = 86400
                             #seconds is here for testing
