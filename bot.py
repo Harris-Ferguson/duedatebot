@@ -14,7 +14,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='@', description="A Bot for the CMPT Study groups discord")
-initial_extensions = ["duedates", "studygroup"]
+initial_extensions = ["duedates", "studygroup", "bulkadd"]
 
 if __name__ == '__main__':
     for extension in initial_extensions:
@@ -23,6 +23,8 @@ if __name__ == '__main__':
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+    for guild in bot.guilds:
+        print(guild.name + ": " + str(guild.id))
 
 
 bot.run(TOKEN)
