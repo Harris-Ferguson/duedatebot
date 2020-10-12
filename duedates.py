@@ -176,7 +176,7 @@ class DueDatesCog(commands.Cog):
         for post in collection.find({"guild":guild, "a_id":arg1}):
             await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
-    @commands.command(name="daystilldue", help="returns how long till the given assignment is due. \narg1: class \narg2: name", aliases=["show"])
+    @commands.command(name="show", help="returns how long till the given assignment is due. \narg1: class \narg2: name", aliases=["daystilldue"])
     async def days_till_due(self, ctx, arg1, arg2):
         guild = ctx.guild.id
         time = ctx.message.created_at
