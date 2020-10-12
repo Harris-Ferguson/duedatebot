@@ -96,8 +96,9 @@ class DueDatesCog(commands.Cog):
     async def todaydue(self, ctx):
         dates = []
         guild = ctx.guild.id
+        currenttime = ctx.message.created_at
         for post in collection.find({"guild": guild}):
-            if post["duedate"].date() == datetime.today().date():
+            if post["duedate"].date() == currenttime.date():
                 dates.append(helpers.build_output_string(post))
 
         for date in dates:
@@ -195,7 +196,7 @@ class DueDatesCog(commands.Cog):
             if post["name"] == arg2 and post["class"] == arg1:
                 await ctx.send(helpers.build_output_string(post))
 
-    @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder")
+    @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder", hidden=True)
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
         guild = ctx.guild.id
         channel = ctx.channel.id
@@ -219,14 +220,14 @@ class DueDatesCog(commands.Cog):
         print('One post:{0}'.format(result.inserted_id))
         await ctx.send("```\nAdded Reminder " + arg3 + " for every " + str(arg1) + " " + arg2 + "\n```")
 
-    @commands.command(name="removereminders", help="removes all reminders")
+    @commands.command(name="removereminders", help="removes all reminders", hidden=True)
     async def remove_reminders(self, ctx):
         guild = ctx.guild.id
         for reminder in reminders.find({"guild":guild}):
             reminders.delete_one({"name":reminder["name"]})
         await ctx.send("```\nRemoved all reminders!\n```")
 
-    @commands.command(name="listreminders", help="lists all reminders")
+    @commands.command(name="listreminders", help="lists all reminders", hidden=True)
     async def list_reminders(self, ctx):
         guild = ctx.guild.id
         for reminder in reminders.find({"guild":guild}):
@@ -236,7 +237,6 @@ class DueDatesCog(commands.Cog):
     async def reminders(self):
         while self is self.bot.get_cog("DueDatesCog"):
             currenttime = time.time()
-            print("here!")
             # only do this if we are connected!
             if self.bot.guilds:
                 for reminder in reminders.find():
@@ -248,11 +248,11 @@ class DueDatesCog(commands.Cog):
                         for post in collection.find({"guild":reminder["guild"]}):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
-                            quantity_multiplier = 1
-                            if "Days" in arg2 or "days" in post["unit"]:
+                            quantity_multiplier =
+                            if "Days" in reminder["unit"] or "days" in reminder["unit"]:
                                 quantity_multiplier = 86400
                             #seconds is here for testing
-                            if "Seconds" in arg2 or "seconds" in post["unit"]:
+                            if "Seconds" in reminder["unit"] or "seconds" in reminder["unit"]:
                                 quantity_multiplier = 1
                             futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
                         reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
