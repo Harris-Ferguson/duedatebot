@@ -44,6 +44,7 @@ class DueDatesCog(commands.Cog):
 
         #Generate the handins list
         handins = []
+        print(str(len(arg4)) + str(arg4))
         if len(arg4) is 0:
             handins.append("None!")
         else:
