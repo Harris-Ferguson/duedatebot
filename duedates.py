@@ -176,7 +176,7 @@ class DueDatesCog(commands.Cog):
         for post in collection.find({"guild":guild, "a_id":arg1}):
             await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
 
-    @commands.command(name="daystilldue", help="returns how long till the given assignment is due. \narg1: class \narg2: name")
+    @commands.command(name="daystilldue", help="returns how long till the given assignment is due. \narg1: class \narg2: name", aliases=["show"])
     async def days_till_due(self, ctx, arg1, arg2):
         guild = ctx.guild.id
         time = ctx.message.created_at
@@ -188,13 +188,6 @@ class DueDatesCog(commands.Cog):
                     await ctx.send("```\nDue Today at: " + post["duedate"].strftime("%I:%M%p") +"\n```")
                 else:
                     await ctx.send("```\nDue in: " + str(timetilldue.days) + " Days " + str(int(timetilldue.seconds / 3600)) + " Hours\n```")
-
-    @commands.command(name="show", help="prints out the details of a specific assignment \narg1: class \narg2: name")
-    async def show_assign(self, ctx, arg1, arg2):
-        guild = ctx.guild.id
-        for post in collection.find({"guild":guild}):
-            if post["name"] == arg2 and post["class"] == arg1:
-                await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder", hidden=True)
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
