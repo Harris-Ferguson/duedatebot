@@ -24,7 +24,6 @@ class BulkAddCog(commands.Cog):
 
         duedates = self.bot.get_cog('DueDatesCog')
         for row in reader:
-            print(row['class'], row['name'], row['date'], row['handins'])
             if row['handins'] is not None:
                 handins = tuple(map(str, row['handins'].split()))
             else:

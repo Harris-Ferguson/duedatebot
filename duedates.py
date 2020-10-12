@@ -44,7 +44,6 @@ class DueDatesCog(commands.Cog):
 
         #Generate the handins list
         handins = []
-        print(str(len(arg4)) + str(arg4))
         if len(arg4) is 0:
             handins.append("None!")
         else:
@@ -202,7 +201,7 @@ class DueDatesCog(commands.Cog):
         guild = ctx.guild.id
         channel = ctx.channel.id
         quantity_multiplier = 1
-        if "Days" in arg2 or "days" in arg2:
+        if "Days" in arg2 or "days" in arg2 or "day" in arg2 or "Day" in arg2:
             quantity_multiplier = 86400
         #seconds is here for testing
         if "Seconds" in arg2 or "seconds" in arg2:
