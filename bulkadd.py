@@ -22,11 +22,14 @@ class BulkAddCog(commands.Cog):
         lines = response.text.splitlines()
         reader = csv.DictReader(lines)
 
-        print("here")
         duedates = self.bot.get_cog('DueDatesCog')
         for row in reader:
             print(row['class'], row['name'], row['date'], row['handins'])
-            await duedates.duedate(ctx, row['class'], row['name'], row['date'], row['handins'])
+            if row['handins'] is not None:
+                handins = tuple(map(str, row['handins'].split()))
+            else:
+                handins = []
+            await duedates.duedate(ctx, row['class'], row['name'], row['date'], *handins)
 
 def setup(bot):
     bot.add_cog(BulkAddCog(bot))
