@@ -2,6 +2,9 @@
 a due date reminder bot for discord 
 Create new Due-Dates, sort them by Course, and add what files you need to hand in! 
 
+# Installing 
+[Link to add to your server!](https://discord.com/api/oauth2/authorize?client_id=764269247446646815&permissions=68608&scope=bot)
+
 ## Contributing: 
 ### Dependancies:
 You will need to install the following packages via pip:
