@@ -32,19 +32,19 @@ class StudyGroupCog(commands.Cog):
             pick = random.randint(0,len(mikes) - 1)
             await ctx.send(str(mikes[pick]))
 
-            exists = await is_in_db(ctx.author.id)
+            exists = await ctx.invoke(self.bot.get_command("is_in_db"), id=ctx.author.id)
             if exists:
                 count = 0
                 for user in users.find({"user_id":ctx.author.id}):
                     count = user["mikes"] + 1
                 users.update_one({"user_id":ctx.author.id}, {"$set":{"mikes":count}})
             else:
-                await add_user(ctx)
+                await ctx.invoke(self.bot.get_command("add_user"), arg1=ctx)
 
     @commands.command(hidden=True)
-    async def add_user(self, ctx):
-        guild = ctx.guild.id
-        user_id = ctx.author.id
+    async def add_user(self, arg1):
+        guild = arg1.guild.id
+        user_id = arg1.author.id
 
         user_data = {
             "guild":guild,
