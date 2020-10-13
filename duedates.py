@@ -202,6 +202,8 @@ class DueDatesCog(commands.Cog):
             quantity_multiplier = 604800 # 86400 * 7
         elif "days" in arg2.lower() or "day" in arg2.lower():
             quantity_multiplier = 86400
+        elif "minutes" in arg2.lower() or "minute" in arg2.lower():
+            quantity_multiplier = 60
         elif "seconds" in arg2.lower():
             quantity_multiplier = 1
 
@@ -246,18 +248,21 @@ class DueDatesCog(commands.Cog):
                         for post in collection.find({"guild":reminder["guild"]}):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
+                        quantity_multiplier = 1
+                        if "years" in reminder["unit"].lower() or "year" in reminder["unit"].lower():
+                            quantity_multiplier = 31536000 # 86400 * 365
+                        elif "months" in reminder["unit"].lower() or "month" in reminder["unit"].lower():
+                            quantity_multiplier = 2592000 # 86400 * 30
+                        elif "weeks" in reminder["unit"].lower() or "week" in reminder["unit"].lower():
+                            quantity_multiplier = 604800 # 86400 * 7
+                        elif "days" in reminder["unit"].lower() or "day" in reminder["unit"].lower():
+                            quantity_multiplier = 86400
+                        elif "minutes" in reminder["unit"].lower() or "minute" in reminder["unit"].lower():
+                            quantity_multiplier = 60
+                        elif "seconds" in reminder["unit"].lower():
                             quantity_multiplier = 1
-                            if "years" in reminder["unit"].lower() or "year" in reminder["unit"].lower():
-                                quantity_multiplier = 31536000 # 86400 * 365
-                            elif "months" in reminder["unit"].lower() or "month" in reminder["unit"].lower():
-                                quantity_multiplier = 2592000 # 86400 * 30
-                            elif "weeks" in reminder["unit"].lower() or "week" in reminder["unit"].lower():
-                                quantity_multiplier = 604800 # 86400 * 7
-                            elif "days" in reminder["unit"].lower() or "day" in reminder["unit"].lower():
-                                quantity_multiplier = 86400
-                            elif "seconds" in reminder["unit"].lower():
-                                quantity_multiplier = 1
-                            futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
+                        print(quantity_multiplier)
+                        futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
                         reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
             await asyncio.sleep(10)
 
