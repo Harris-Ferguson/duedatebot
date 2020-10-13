@@ -2,6 +2,13 @@
 Helper functions for the bot
 """
 from datetime import datetime
+import os
+from pymongo import MongoClient
+
+DBPASS = os.getenv('DB_PASS')
+cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
+db = cluster["duedates"]
+users = db["users"]
 
 def build_output_string(post):
     """
@@ -18,3 +25,10 @@ def build_output_string(post):
 
     return "```md\n> Assignment ID: " + str(post["a_id"]) + "\n# " + post["class"] + "\n# " + post["name"] + \
     "\n< Due On: " + post["duedate"].strftime('%b %d %Y %I:%S %p') + " >\nHand-Ins:\n" + h + "```"
+
+
+def is_in_db(id):
+    if users.find({"user":id}).count() > 0:
+        return True
+    else:
+        return False

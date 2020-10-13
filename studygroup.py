@@ -32,17 +32,16 @@ class StudyGroupCog(commands.Cog):
             pick = random.randint(0,len(mikes) - 1)
             await ctx.send(str(mikes[pick]))
 
-            exists = await ctx.invoke(self.bot.get_command("is_in_db"), id=ctx.author.id)
-            if exists:
+            if helpers.is_in_db(ctx.author.id)
                 count = 0
                 for user in users.find({"user_id":ctx.author.id}):
                     count = user["mikes"] + 1
                 users.update_one({"user_id":ctx.author.id}, {"$set":{"mikes":count}})
             else:
-                await ctx.invoke(self.bot.get_command("add_user"), arg1=ctx)
+                await ctx.invoke(self.bot.get_command("add_user"))
 
     @commands.command(hidden=True)
-    async def add_user(self, arg1):
+    async def add_user(self, ctx):
         guild = arg1.guild.id
         user_id = arg1.author.id
 
@@ -62,14 +61,6 @@ class StudyGroupCog(commands.Cog):
             everyone[name] = user["mikes"]
         leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
         print(leaderboard)
-
-    @commands.command(hidden=True)
-    async def is_in_db(self, id):
-        if users.find({"user":id}).count() > 0:
-            return True
-        else:
-            return False
-
 
 def setup(bot):
     bot.add_cog(StudyGroupCog(bot))
