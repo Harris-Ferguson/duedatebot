@@ -247,15 +247,15 @@ class DueDatesCog(commands.Cog):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
                             quantity_multiplier = 1
-                            if "years" in arg2.lower() or "year" in arg2.lower():
+                            if "years" in reminder["unit"].lower() or "year" in reminder["unit"].lower():
                                 quantity_multiplier = 31536000 # 86400 * 365
-                            elif "months" in arg2.lower() or "month" in arg2.lower():
+                            elif "months" in reminder["unit"].lower() or "month" in reminder["unit"].lower():
                                 quantity_multiplier = 2592000 # 86400 * 30
-                            elif "weeks" in arg2.lower() or "week" in arg2.lower():
+                            elif "weeks" in reminder["unit"].lower() or "week" in reminder["unit"].lower():
                                 quantity_multiplier = 604800 # 86400 * 7
-                            elif "days" in arg2.lower() or "day" in arg2.lower():
+                            elif "days" in reminder["unit"].lower() or "day" in reminder["unit"].lower():
                                 quantity_multiplier = 86400
-                            elif "seconds" in arg2.lower():
+                            elif "seconds" in reminder["unit"].lower():
                                 quantity_multiplier = 1
                             futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
                         reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
