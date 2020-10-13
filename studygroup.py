@@ -25,23 +25,23 @@ class StudyGroupCog(commands.Cog):
     @commands.command(name="mike", help="just for fun")
     async def mike(self, ctx):
         guildname = ctx.guild.name
-        # if guildname == "CMPT Study Groups":
+        if guildname == "CMPT Study Groups":
         # print the emoji first
-        #emojis = ctx.guild.emojis
-        #mikes = []ß
-        #for emoji in emojis:
-        #    if "Mike" in emoji.name or emoji.name == "HolUp":
-        #        mikes.append(emoji)
-        #pick = random.randint(0,len(mikes) - 1)
-        #await ctx.send(str(mikes[pick]))
+            emojis = ctx.guild.emojis
+            mikes = []
+            for emoji in emojis:
+                if "Mike" in emoji.name or emoji.name == "HolUp":
+                    mikes.append(emoji)
+            pick = random.randint(0,len(mikes) - 1)
+            await ctx.send(str(mikes[pick]))
 
-        if helpers.is_in_db(ctx.author.display_name):
-            count = 0
-            for user in users.find({"name":ctx.author.display_name}):
-                count = user["mikes"] + 1
-            users.update_one({"name":ctx.author.display_name}, {"$set":{"mikes":count}})
-        else:
-            await ctx.invoke(self.bot.get_command("add_user"))
+            if helpers.is_in_db(ctx.author.display_name):
+                count = 0
+                for user in users.find({"name":ctx.author.display_name}):
+                    count = user["mikes"] + 1
+                users.update_one({"name":ctx.author.display_name}, {"$set":{"mikes":count}})
+            else:
+                await ctx.invoke(self.bot.get_command("add_user"))
 
     @commands.command(hidden=True)
     async def add_user(self, ctx):
