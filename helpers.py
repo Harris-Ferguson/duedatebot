@@ -1,10 +1,19 @@
 """
 Helper functions for the bot
 """
-from datetime import datetime
 import os
+import pymongo
+from datetime import datetime
+import time
+import json
 from pymongo import MongoClient
+import discord
+from discord.ext import commands
+from dotenv import load_dotenv
+import hashlib
+import asyncio
 
+load_dotenv()
 DBPASS = os.getenv('DB_PASS')
 cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
 db = cluster["duedates"]
@@ -27,8 +36,8 @@ def build_output_string(post):
     "\n< Due On: " + post["duedate"].strftime('%b %d %Y %I:%S %p') + " >\nHand-Ins:\n" + h + "```"
 
 
-def is_in_db(id):
-    if users.find({"user":id}).count() > 0:
+def is_in_db(name):
+    if users.find({"name":name}).count() > 0:
         return True
     else:
         return False
