@@ -64,7 +64,7 @@ class StudyGroupCog(commands.Cog):
         print(leaderboard)
 
     @commands.command(hidden=True)
-    def is_in_db(self, id):
+    async def is_in_db(self, id):
         if users.find({"user":id}).count() > 0:
             return True
         else:
