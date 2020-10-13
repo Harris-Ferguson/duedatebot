@@ -38,7 +38,7 @@ class StudyGroupCog(commands.Cog):
                     count = user["mikes"] + 1
                 users.update_one({"user_id":ctx.author.id}, {"$set":{"mikes":count}})
             else:
-                add_user(ctx)
+                await add_user(ctx)
 
     @commands.command(hidden=True)
     async def add_user(self, ctx):
@@ -53,13 +53,6 @@ class StudyGroupCog(commands.Cog):
         result = users.insert_one(user_data)
         print('Added User:{0}'.format(result.inserted_id))
 
-    @commands.command(hidden=True)
-    async def is_in_db(self, id):
-        if users.find({"user":id}).count() > 0:
-            return True
-        else:
-            return False
-
     @commands.command(name="leaderboard", help="I was keeping track the whole time")
     async def top_5(self, ctx):
         everyone = {}
@@ -68,6 +61,12 @@ class StudyGroupCog(commands.Cog):
             everyone[name] = user["mikes"]
         leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
         print(leaderboard)
+
+    def is_in_db(self, id):
+        if users.find({"user":id}).count() > 0:
+            return True
+        else:
+            return False
 
 
 def setup(bot):
