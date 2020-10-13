@@ -32,7 +32,8 @@ class StudyGroupCog(commands.Cog):
             pick = random.randint(0,len(mikes) - 1)
             await ctx.send(str(mikes[pick]))
 
-            if is_in_db(ctx.author.id):
+            exists = await is_in_db(ctx.author.id)
+            if exists:
                 count = 0
                 for user in users.find({"user_id":ctx.author.id}):
                     count = user["mikes"] + 1
@@ -62,6 +63,7 @@ class StudyGroupCog(commands.Cog):
         leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
         print(leaderboard)
 
+    @commands.command(hidden=True)
     def is_in_db(self, id):
         if users.find({"user":id}).count() > 0:
             return True
