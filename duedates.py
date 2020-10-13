@@ -194,10 +194,15 @@ class DueDatesCog(commands.Cog):
         guild = ctx.guild.id
         channel = ctx.channel.id
         quantity_multiplier = 1
-        if "Days" in arg2 or "days" in arg2 or "day" in arg2 or "Day" in arg2:
+        if "years" in arg2.lower() or "year" in arg2.lower():
+            quantity_multiplier = 31536000 # 86400 * 365
+        elif "months" in arg2.lower() or "month" in arg2.lower():
+            quantity_multiplier = 2592000 # 86400 * 30
+        elif "weeks" in arg2.lower() or "week" in arg2.lower():
+            quantity_multiplier = 604800 # 86400 * 7
+        elif "days" in arg2.lower() or "day" in arg2.lower():
             quantity_multiplier = 86400
-        #seconds is here for testing
-        if "Seconds" in arg2 or "seconds" in arg2:
+        elif "seconds" in arg2.lower():
             quantity_multiplier = 1
 
         futuretime = int(time.time() + (arg1 * quantity_multiplier))
