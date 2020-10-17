@@ -193,19 +193,7 @@ class DueDatesCog(commands.Cog):
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
         guild = ctx.guild.id
         channel = ctx.channel.id
-        quantity_multiplier = 1
-        if "years" in arg2.lower() or "year" in arg2.lower():
-            quantity_multiplier = 31536000 # 86400 * 365
-        elif "months" in arg2.lower() or "month" in arg2.lower():
-            quantity_multiplier = 2592000 # 86400 * 30
-        elif "weeks" in arg2.lower() or "week" in arg2.lower():
-            quantity_multiplier = 604800 # 86400 * 7
-        elif "days" in arg2.lower() or "day" in arg2.lower():
-            quantity_multiplier = 86400
-        elif "minutes" in arg2.lower() or "minute" in arg2.lower():
-            quantity_multiplier = 60
-        elif "seconds" in arg2.lower():
-            quantity_multiplier = 1
+        quantity_multiplier = time_in_seconds(arg2)
 
         futuretime = int(time.time() + (arg1 * quantity_multiplier))
         reminder_data = {
@@ -248,7 +236,7 @@ class DueDatesCog(commands.Cog):
                         for post in collection.find({"guild":reminder["guild"]}):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
-                        quantity_multiplier = 1
+                        quantity_multiplier = time_in_seconds(reminder["unit"])
                         if "years" in reminder["unit"].lower() or "year" in reminder["unit"].lower():
                             quantity_multiplier = 31536000 # 86400 * 365
                         elif "months" in reminder["unit"].lower() or "month" in reminder["unit"].lower():
