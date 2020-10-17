@@ -54,6 +54,9 @@ def time_in_seconds(time):
     return quantity_multiplier
 
 def is_in_db(name):
+    """
+    Returns true if a given users display name is in the database of users
+    """
     if users.find({"name":name}).count() > 0:
         return True
     else:
