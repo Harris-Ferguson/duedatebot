@@ -193,7 +193,7 @@ class DueDatesCog(commands.Cog):
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
         guild = ctx.guild.id
         channel = ctx.channel.id
-        quantity_multiplier = time_in_seconds(arg2)
+        quantity_multiplier = helpers.time_in_seconds(arg2)
 
         futuretime = int(time.time() + (arg1 * quantity_multiplier))
         reminder_data = {
@@ -236,19 +236,7 @@ class DueDatesCog(commands.Cog):
                         for post in collection.find({"guild":reminder["guild"]}):
                             await channel.send(helpers.build_output_string(post))
                             # now reset the reminder
-                        quantity_multiplier = time_in_seconds(reminder["unit"])
-                        if "years" in reminder["unit"].lower() or "year" in reminder["unit"].lower():
-                            quantity_multiplier = 31536000 # 86400 * 365
-                        elif "months" in reminder["unit"].lower() or "month" in reminder["unit"].lower():
-                            quantity_multiplier = 2592000 # 86400 * 30
-                        elif "weeks" in reminder["unit"].lower() or "week" in reminder["unit"].lower():
-                            quantity_multiplier = 604800 # 86400 * 7
-                        elif "days" in reminder["unit"].lower() or "day" in reminder["unit"].lower():
-                            quantity_multiplier = 86400
-                        elif "minutes" in reminder["unit"].lower() or "minute" in reminder["unit"].lower():
-                            quantity_multiplier = 60
-                        elif "seconds" in reminder["unit"].lower():
-                            quantity_multiplier = 1
+                        quantity_multiplier = helpers.time_in_seconds(reminder["unit"])
                         print(quantity_multiplier)
                         futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
                         reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
