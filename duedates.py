@@ -184,10 +184,6 @@ class DueDatesCog(commands.Cog):
             if post["name"] == arg2 and post["class"] == arg1:
                 timetilldue = post["duedate"] - time
                 await ctx.send(helpers.build_output_string(post))
-                if timetilldue.days <= 0:
-                    await ctx.send("```\nDue Today at: " + post["duedate"].strftime("%I:%M%p") +"\n```")
-                else:
-                    await ctx.send("```\nDue in: " + str(timetilldue.days) + " Days " + str(int(timetilldue.seconds / 3600)) + " Hours\n```")
 
     @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder", hidden=True)
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
