@@ -24,8 +24,8 @@ class StudyGroupCog(commands.Cog):
 
     @commands.command(name="mike", help="just for fun")
     async def mike(self, ctx):
-        guildname = ctx.guild.name
-        if guildname == "CMPT Study Groups":
+        guild_id = ctx.guild.id
+        if guild_id == 750992924539486275:
         # print the emoji first
             emojis = ctx.guild.emojis
             mikes = []
