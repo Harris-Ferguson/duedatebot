@@ -58,15 +58,18 @@ class StudyGroupCog(commands.Cog):
         print('Added User:{0}'.format(result.inserted_id))
 
     @commands.command(name="leaderboard", help="I was keeping track the whole time")
+    @commands.cooldown(1, 50000, commands.BucketType.guild)
     async def top_5(self, ctx):
-        await ctx.send("```\nMike Leaderboard!```")
-        everyone = {}
-        for user in users.find({"guild":ctx.guild.id}):
-            everyone[user["name"]] = user["mikes"]
+        channel_name = ctx.channel.name
+        if channel_name == "magic-mike":
+            await ctx.send("```\nMike Leaderboard!```")
+            everyone = {}
+            for user in users.find({"guild":ctx.guild.id}):
+                everyone[user["name"]] = user["mikes"]
 
-        leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
-        for user, mikes in leaderboard.items():
-            await ctx.send('```fix\n' + user + ": " + str(mikes)  + '\n```')
+            leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
+            for user, mikes in leaderboard.items():
+                await ctx.send('```fix\n' + user + ": " + str(mikes)  + '\n```')
 
 def setup(bot):
     bot.add_cog(StudyGroupCog(bot))
