@@ -23,6 +23,7 @@ class StudyGroupCog(commands.Cog):
         self.bot = bot
 
     @commands.command(name="mike", help="just for fun")
+    @commands.cooldown(1, 60, commands.BucketType.guild)
     async def mike(self, ctx):
         guild_id = ctx.guild.id
         if guild_id == 750992924539486275:
