@@ -131,8 +131,11 @@ class DueDatesCog(commands.Cog):
     @commands.command(name="delete", help="Deletes an assigment by id \narg1: Assigment ID")
     async def remove_hand_in(self, ctx, arg1: int):
         guild = ctx.guild.id
-        collection.delete_one({"guild":guild, "a_id":arg1})
-        await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
+        result = collection.delete_one({"guild":guild, "a_id":arg1})
+        if result.deleted_count <= 0:
+            await ctx.send("```\nID not found!\n```")
+        else:
+            await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
 
     @commands.command(name="deletepastdue", help="Deletes all assignments that are past due", hidden="True")
     async def remove_past_due(self, ctx):
