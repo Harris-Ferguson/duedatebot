@@ -147,7 +147,7 @@ class DueDatesCog(commands.Cog):
     async def change_due_date(self, ctx, arg1: int, arg2):
         guild = ctx.guild.id
         try:
-            duedatetime = datetime.strptime(arg2, '%b %d %Y %H:%S')
+            duedatetime = datetime.strptime(arg2, '%b %d %Y %H:%M')
         except ValueError:
             try:
                 duedatetime = datetime.strptime(arg2, '%b %d %Y')
