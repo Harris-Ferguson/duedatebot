@@ -32,7 +32,7 @@ class DueDatesCog(commands.Cog):
     async def duedate(self, ctx, arg1, arg2, arg3, *arg4):
         # this is pretty sloppy, ideally we should abstract this behaviour and use regex but this try catch works for now
         try:
-            duedatetime = datetime.strptime(arg3, '%b %d %Y %H:%S')
+            duedatetime = datetime.strptime(arg3, '%b %d %Y %H:%M')
         except ValueError:
             try:
                 duedatetime = datetime.strptime(arg3, '%b %d %Y')
@@ -131,15 +131,18 @@ class DueDatesCog(commands.Cog):
     @commands.command(name="delete", help="Deletes an assigment by id \narg1: Assigment ID")
     async def remove_hand_in(self, ctx, arg1: int):
         guild = ctx.guild.id
-        collection.delete_one({"guild":guild, "a_id":arg1})
-        await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
+        result = collection.delete_one({"guild":guild, "a_id":arg1})
+        if result.deleted_count <= 0:
+            await ctx.send("```\nID not found!\n```")
+        else:
+            await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
 
-    @commands.command(name="deletepastdue", help="Deletes all assignments that are past due")
+    @commands.command(name="deletepastdue", help="Deletes all assignments that are past due", hidden="True")
     async def remove_past_due(self, ctx):
         guild = ctx.guild.id
         for post in collection.find({"guild":guild}):
             timedel = post["duedate"] - datetime.now()
-            if timedel.days < 0:
+            if timedel.seconds < 0:
                 await ctx.send("Deleted: " + post["class"] + " " + post["name"])
                 collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
 
@@ -147,7 +150,7 @@ class DueDatesCog(commands.Cog):
     async def change_due_date(self, ctx, arg1: int, arg2):
         guild = ctx.guild.id
         try:
-            duedatetime = datetime.strptime(arg2, '%b %d %Y %H:%S')
+            duedatetime = datetime.strptime(arg2, '%b %d %Y %H:%M')
         except ValueError:
             try:
                 duedatetime = datetime.strptime(arg2, '%b %d %Y')
@@ -185,23 +188,11 @@ class DueDatesCog(commands.Cog):
                 timetilldue = post["duedate"] - time
                 await ctx.send(helpers.build_output_string(post))
 
-    @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder", hidden=True)
+    @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder")
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
         guild = ctx.guild.id
         channel = ctx.channel.id
-        quantity_multiplier = 1
-        if "years" in arg2.lower() or "year" in arg2.lower():
-            quantity_multiplier = 31536000 # 86400 * 365
-        elif "months" in arg2.lower() or "month" in arg2.lower():
-            quantity_multiplier = 2592000 # 86400 * 30
-        elif "weeks" in arg2.lower() or "week" in arg2.lower():
-            quantity_multiplier = 604800 # 86400 * 7
-        elif "days" in arg2.lower() or "day" in arg2.lower():
-            quantity_multiplier = 86400
-        elif "minutes" in arg2.lower() or "minute" in arg2.lower():
-            quantity_multiplier = 60
-        elif "seconds" in arg2.lower():
-            quantity_multiplier = 1
+        quantity_multiplier = helpers.time_in_seconds(arg2)
 
         futuretime = int(time.time() + (arg1 * quantity_multiplier))
         reminder_data = {
@@ -216,54 +207,33 @@ class DueDatesCog(commands.Cog):
         print('One post:{0}'.format(result.inserted_id))
         await ctx.send("```\nAdded Reminder " + arg3 + " for every " + str(arg1) + " " + arg2 + "\n```")
 
-    @commands.command(name="removereminders", help="removes all reminders", hidden=True)
+    @commands.command(name="removereminders", help="removes all reminders")
     async def remove_reminders(self, ctx):
         guild = ctx.guild.id
         for reminder in reminders.find({"guild":guild}):
             reminders.delete_one({"name":reminder["name"]})
         await ctx.send("```\nRemoved all reminders!\n```")
 
-    @commands.command(name="listreminders", help="lists all reminders", hidden=True)
+    @commands.command(name="listreminders", help="lists all reminders")
     async def list_reminders(self, ctx):
         guild = ctx.guild.id
         for reminder in reminders.find({"guild":guild}):
             await ctx.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
             str(reminder["interval"]) +" " + reminder["unit"] +"\nTo Channel:" + ctx.guild.get_channel(reminder["channel"]).name + "\n```")
 
-    async def reminders(self):
+    async def self_loop(self):
         while self is self.bot.get_cog("DueDatesCog"):
-            currenttime = time.time()
             # only do this if we are connected!
             if self.bot.guilds:
-                for reminder in reminders.find():
-                    # check if the reminder time is in the past
-                    if reminder["time"] <= currenttime:
-                        guild = self.bot.get_guild(reminder["guild"])
-                        channel = guild.get_channel(reminder["channel"])
-                        await channel.send("```\nReminder!\n```")
-                        for post in collection.find({"guild":reminder["guild"]}):
-                            await channel.send(helpers.build_output_string(post))
-                            # now reset the reminder
-                        quantity_multiplier = 1
-                        if "years" in reminder["unit"].lower() or "year" in reminder["unit"].lower():
-                            quantity_multiplier = 31536000 # 86400 * 365
-                        elif "months" in reminder["unit"].lower() or "month" in reminder["unit"].lower():
-                            quantity_multiplier = 2592000 # 86400 * 30
-                        elif "weeks" in reminder["unit"].lower() or "week" in reminder["unit"].lower():
-                            quantity_multiplier = 604800 # 86400 * 7
-                        elif "days" in reminder["unit"].lower() or "day" in reminder["unit"].lower():
-                            quantity_multiplier = 86400
-                        elif "minutes" in reminder["unit"].lower() or "minute" in reminder["unit"].lower():
-                            quantity_multiplier = 60
-                        elif "seconds" in reminder["unit"].lower():
-                            quantity_multiplier = 1
-                        print(quantity_multiplier)
-                        futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
-                        reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
+                print("checking reminders")
+                await helpers.check_reminders(self)
+                print("checking past due")
+                await helpers.check_for_past_due()
             await asyncio.sleep(10)
+
 
 def setup(bot):
     b = DueDatesCog(bot)
     eloop = asyncio.get_event_loop()
-    eloop.create_task(b.reminders())
+    eloop.create_task(b.self_loop())
     bot.add_cog(b)
