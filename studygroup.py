@@ -61,7 +61,7 @@ class StudyGroupCog(commands.Cog):
     @commands.cooldown(1, 6000, commands.BucketType.guild)
     @commands.has_permissions(administrator=True)
     async def top_5(self, ctx):
-    channel_name = ctx.channel.name
+        channel_name = ctx.channel.name
         await ctx.send("```\nMike Leaderboard!```")
         everyone = {}
         for user in users.find({"guild":ctx.guild.id}):
