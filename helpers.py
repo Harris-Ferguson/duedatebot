@@ -64,15 +64,17 @@ def is_in_db(name):
     else:
         return False
 
-def is_past_due(guild, a_id):
+def is_past_due(post):
     """
     Checks if a given assignment with a_id is past due
     """
-    for post in collection.find({"guild":guild, "a_id":a_id}):
-        timediff = post["duedate"] - datetime.now()
-        if timedel < 0:
-            return True
+    print("pastdue?:{0}".format(post["duedate"] < datetime.now()))
+    if post["duedate"] < datetime.now():
+        return True
     return False
+
+def delete_duedate_post(post):
+    collection.delete_one({"guild":post["guild"], "a_id":post["a_id"], "class":post["class"]})
 
 async def check_reminders(bot):
     """
@@ -90,3 +92,13 @@ async def check_reminders(bot):
             quantity_multiplier = time_in_seconds(reminder["unit"])
             futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
             reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
+
+async def check_for_past_due():
+    """
+    Check through the database for anything considered past due
+    """
+    for post in collection.find():
+        print(post)
+        if is_past_due(post):
+            print("deleted:{0}".format(post["a_id"]))
+            delete_duedate_post(post)

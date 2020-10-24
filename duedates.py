@@ -139,7 +139,7 @@ class DueDatesCog(commands.Cog):
         guild = ctx.guild.id
         for post in collection.find({"guild":guild}):
             timedel = post["duedate"] - datetime.now()
-            if timedel.days < 0:
+            if timedel.seconds < 0:
                 await ctx.send("Deleted: " + post["class"] + " " + post["name"])
                 collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
 
@@ -226,7 +226,10 @@ class DueDatesCog(commands.Cog):
         while self is self.bot.get_cog("DueDatesCog"):
             # only do this if we are connected!
             if self.bot.guilds:
+                print("checking reminders")
                 await helpers.check_reminders(self)
+                print("checking past due")
+                await helpers.check_for_past_due()
             await asyncio.sleep(10)
 
 
