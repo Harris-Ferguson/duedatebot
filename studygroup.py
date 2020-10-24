@@ -23,7 +23,7 @@ class StudyGroupCog(commands.Cog):
         self.bot = bot
 
     @commands.command(name="mike", help="just for fun")
-    @commands.cooldown(1, 60, commands.BucketType.guild)
+    @commands.cooldown(3, 60, commands.BucketType.user)
     async def mike(self, ctx):
         guild_id = ctx.guild.id
         if guild_id == 750992924539486275:
@@ -58,18 +58,18 @@ class StudyGroupCog(commands.Cog):
         print('Added User:{0}'.format(result.inserted_id))
 
     @commands.command(name="leaderboard", help="I was keeping track the whole time")
-    @commands.cooldown(1, 50000, commands.BucketType.guild)
+    @commands.cooldown(1, 6000, commands.BucketType.guild)
+    @commands.has_permissions(administrator=True)
     async def top_5(self, ctx):
-        channel_name = ctx.channel.name
-        if channel_name == "magic-mike":
-            await ctx.send("```\nMike Leaderboard!```")
-            everyone = {}
-            for user in users.find({"guild":ctx.guild.id}):
-                everyone[user["name"]] = user["mikes"]
+    channel_name = ctx.channel.name
+        await ctx.send("```\nMike Leaderboard!```")
+        everyone = {}
+        for user in users.find({"guild":ctx.guild.id}):
+            everyone[user["name"]] = user["mikes"]
 
-            leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
-            for user, mikes in leaderboard.items():
-                await ctx.send('```fix\n' + user + ": " + str(mikes)  + '\n```')
+        leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
+        for user, mikes in leaderboard.items():
+            await ctx.send('```fix\n' + user + ": " + str(mikes)  + '\n```')
 
 def setup(bot):
     bot.add_cog(StudyGroupCog(bot))
