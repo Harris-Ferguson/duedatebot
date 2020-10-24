@@ -32,7 +32,7 @@ class DueDatesCog(commands.Cog):
     async def duedate(self, ctx, arg1, arg2, arg3, *arg4):
         # this is pretty sloppy, ideally we should abstract this behaviour and use regex but this try catch works for now
         try:
-            duedatetime = datetime.strptime(arg3, '%b %d %Y %H:%S')
+            duedatetime = datetime.strptime(arg3, '%b %d %Y %H:%M')
         except ValueError:
             try:
                 duedatetime = datetime.strptime(arg3, '%b %d %Y')
