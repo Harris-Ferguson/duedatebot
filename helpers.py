@@ -18,6 +18,8 @@ DBPASS = os.getenv('DB_PASS')
 cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
 db = cluster["duedates"]
 users = db["users"]
+collection = db["duedates"]
+reminders = db["reminders"]
 
 def build_output_string(post):
     """
@@ -61,3 +63,30 @@ def is_in_db(name):
         return True
     else:
         return False
+
+def is_past_due(guild, a_id):
+    """
+    Checks if a given assignment with a_id is past due
+    """
+    for post in collection.find({"guild":guild, "a_id":a_id}):
+        timediff = post["duedate"] - datetime.now()
+        if timedel < 0:
+            return True
+    return False
+
+async def check_reminders(bot):
+    """
+    Checks through all the reminders, and updates any as needed
+    """
+    currenttime = time.time()
+    for reminder in reminders.find():
+        if reminder["time"] <= currenttime:
+            guild = bot.bot.get_guild(reminder["guild"])
+            channel = guild.get_channel(reminder["channel"])
+            await channel.send("```\nReminder!\n```")
+            for post in collection.find({"guild":reminder["guild"]}):
+                await channel.send(build_output_string(post))
+                # now reset the reminder
+            quantity_multiplier = time_in_seconds(reminder["unit"])
+            futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
+            reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})

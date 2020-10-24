@@ -224,23 +224,11 @@ class DueDatesCog(commands.Cog):
 
     async def reminders(self):
         while self is self.bot.get_cog("DueDatesCog"):
-            currenttime = time.time()
             # only do this if we are connected!
             if self.bot.guilds:
-                # Check Reminders
-                for reminder in reminders.find():
-                    # check if the reminder time is in the past
-                    if reminder["time"] <= currenttime:
-                        guild = self.bot.get_guild(reminder["guild"])
-                        channel = guild.get_channel(reminder["channel"])
-                        await channel.send("```\nReminder!\n```")
-                        for post in collection.find({"guild":reminder["guild"]}):
-                            await channel.send(helpers.build_output_string(post))
-                            # now reset the reminder
-                        quantity_multiplier = helpers.time_in_seconds(reminder["unit"])
-                        futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
-                        reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
+                await helpers.check_reminders(self)
             await asyncio.sleep(10)
+
 
 def setup(bot):
     b = DueDatesCog(bot)
