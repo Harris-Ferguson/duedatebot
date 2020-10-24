@@ -2,6 +2,9 @@
 a due date reminder bot for discord 
 Create new Due-Dates, sort them by Course, and add what files you need to hand in! 
 
+# Installing 
+[Link to add to your server!](https://discord.com/api/oauth2/authorize?client_id=764269247446646815&permissions=68608&scope=bot)
+
 ## Contributing: 
 ### Dependancies:
 You will need to install the following packages via pip:
@@ -16,9 +19,8 @@ You will need to install the following packages via pip:
 DISCORD_TOKEN=<Your discord bot token>
 DB_PASS=<Your mongodb token>
  ```
-For developing, you should create your own discord bot and test server to run it in. Once anything is merged with main, it will be pushed to Heroku and built, and will then use the Live bots tokens. 
-
-For the database, you have 2 options. If you are worried about messing up the existing live database, you can create your own cluster with MongoDB. At this stage, you can use the current database, its unlikely you will mass delete anything important since its only live on 1 server while we develop. Message duckypotato on discord if you want the token. 
+For developing, you should create your own discord bot and test server to run it in. 
+create your own cluster with MongoDB as well for testing. 
  
  ### What to do? 
 
