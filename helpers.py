@@ -35,7 +35,7 @@ def build_output_string(post):
         h = h + "* " + handin + "\n"
 
     return "```md\n> Assignment ID: " + str(post["a_id"]) + "\n# " + post["class"] + "\n# " + post["name"] + \
-    "\n< Due On: " + post["duedate"].strftime('%b %d %Y %I:%S %p') + " >\nHand-Ins:\n" + h + "```"
+    "\n< Due On: " + post["duedate"].strftime('%b %d %Y %I:%M %p') + " >\nHand-Ins:\n" + h + "```"
 
 def time_in_seconds(time):
     """
