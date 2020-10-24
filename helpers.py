@@ -68,7 +68,6 @@ def is_past_due(post):
     """
     Checks if a given assignment with a_id is past due
     """
-    print("pastdue?:{0}".format(post["duedate"] < datetime.now()))
     if post["duedate"] < datetime.now():
         return True
     return False
@@ -98,7 +97,5 @@ async def check_for_past_due():
     Check through the database for anything considered past due
     """
     for post in collection.find():
-        print(post)
         if is_past_due(post):
-            print("deleted:{0}".format(post["a_id"]))
             delete_duedate_post(post)

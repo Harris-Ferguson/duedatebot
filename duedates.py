@@ -134,7 +134,7 @@ class DueDatesCog(commands.Cog):
         collection.delete_one({"guild":guild, "a_id":arg1})
         await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
 
-    @commands.command(name="deletepastdue", help="Deletes all assignments that are past due")
+    @commands.command(name="deletepastdue", help="Deletes all assignments that are past due", hidden="True")
     async def remove_past_due(self, ctx):
         guild = ctx.guild.id
         for post in collection.find({"guild":guild}):
@@ -222,7 +222,7 @@ class DueDatesCog(commands.Cog):
             await ctx.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
             str(reminder["interval"]) +" " + reminder["unit"] +"\nTo Channel:" + ctx.guild.get_channel(reminder["channel"]).name + "\n```")
 
-    async def reminders(self):
+    async def self_loop(self):
         while self is self.bot.get_cog("DueDatesCog"):
             # only do this if we are connected!
             if self.bot.guilds:
@@ -236,5 +236,5 @@ class DueDatesCog(commands.Cog):
 def setup(bot):
     b = DueDatesCog(bot)
     eloop = asyncio.get_event_loop()
-    eloop.create_task(b.reminders())
+    eloop.create_task(b.self_loop())
     bot.add_cog(b)
