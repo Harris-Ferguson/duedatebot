@@ -36,8 +36,8 @@ class DueDatesCog(commands.Cog):
         except ValueError:
             try:
                 duedatetime = datetime.strptime(arg3, '%b %d %Y')
-            except:
-                await ctx.send("Due date could not be parsed")
+            except ValueError:
+                await ctx.send("Due date {0} could not be parsed".format(arg3))
                 return
 
         guild = ctx.guild.id
@@ -225,9 +225,7 @@ class DueDatesCog(commands.Cog):
         while self is self.bot.get_cog("DueDatesCog"):
             # only do this if we are connected!
             if self.bot.guilds:
-                print("checking reminders")
                 await helpers.check_reminders(self)
-                print("checking past due")
                 await helpers.check_for_past_due()
             await asyncio.sleep(10)
 
