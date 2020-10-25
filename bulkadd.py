@@ -13,7 +13,7 @@ class BulkAddCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="bulkadd", help="bulkadds assignments from a csv attached to the command message\n CVS header format: class, name, date, handins\n handins should be a spaces seperated list")
+    @commands.command(name="bulkadd", help="bulkadds assignments from a csv attached to the command message\n CVS header format: class,name,date,handins\n handins should be a spaces seperated list")
     async def bulk_add(self, ctx):
         bulk_list_url = ""
         for file in ctx.message.attachments:
