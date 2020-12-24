@@ -109,29 +109,22 @@ class DueDates(commands.Cog):
 
     @commands.command(name="setreminder", help="set a timed reminder for all assignments that will be sent to the channel you ran this command in\narg1: Time Quantity \narg2: Time Unit (only days supported right now) \narg3: name of the reminder")
     async def set_reminder(self, ctx, arg1: int, arg2: str, arg3):
-        guild = ctx.guild.id
-        channel = ctx.channel.id
         quantity_multiplier = helpers.time_in_seconds(arg2)
-
         futuretime = int(time.time() + (arg1 * quantity_multiplier))
-        reminder_data = {
-            "guild":guild,
-            "channel":channel,
-            "time":futuretime,
-            "interval":arg1,
-            "unit":arg2,
-            "name":arg3
-        }
-        result = reminders.insert_one(reminder_data)
-        print('One post:{0}'.format(result.inserted_id))
+        await self.storage.add_reminder(ctx.guild.id, ctx.channel.id, futuretime, arg1, arg2, arg3)
         await ctx.send("```\nAdded Reminder " + arg3 + " for every " + str(arg1) + " " + arg2 + "\n```")
 
     @commands.command(name="listreminders", help="lists all reminders")
     async def list_reminders(self, ctx):
-        guild = ctx.guild.id
-        for reminder in reminders.find({"guild":guild}):
+        reminders = await self.storage.get_reminders(ctx.guild.id)
+        for reminder in reminders:
             await ctx.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
             str(reminder["interval"]) +" " + reminder["unit"] +"\nTo Channel:" + ctx.guild.get_channel(reminder["channel"]).name + "\n```")
+
+    @commands.command(name="clearreminders", help="clears all reminders")
+    async def clear_reminders(self, ctx):
+        await self.storage.clear_reminders(ctx.guild.id)
+        await ctx.send("```Cleared reminders```")
 
     @commands.command(name="bulkadd", help="bulkadds assignments from a csv attached to the command message\n CVS header format: class, name, date, handins\n handins should be a spaces seperated list")
     async def bulk_add(self, ctx):
@@ -146,7 +139,15 @@ class DueDates(commands.Cog):
     @tasks.loop(seconds=30.0)
     async def track_dates(self):
         print("Checking Reminders")
-        await self.storage.check_reminders()
+        # this behaviour should be abstracted
+        reminders = await self.storage.check_reminders()
+        if reminders:
+            for reminder in reminders:
+                guild = self.bot.get_guild(reminder["guild"])
+                channel = guild.get_channel(reminder["channel"])
+                await channel.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
+                str(reminder["interval"]) +" " + reminder["unit"] + "\n```")
+
         print("Checking for Past Due Posts")
         await self.storage.check_for_past_due()
 
