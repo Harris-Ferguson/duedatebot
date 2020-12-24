@@ -146,21 +146,14 @@ class DueDates(commands.Cog):
     @tasks.loop(seconds=30.0)
     async def track_dates(self):
         print("Checking Reminders")
-        await helpers.check_reminders(self)
+        await self.storage.check_reminders()
         print("Checking for Past Due Posts")
-        await helpers.check_for_past_due()
+        await self.storage.check_for_past_due()
 
     @track_dates.before_loop
     async def before_track_dates(self):
         await self.bot.wait_until_ready()
 
-    async def remove_past_due(self, ctx):
-        guild = ctx.guild.id
-        for post in collection.find({"guild":guild}):
-            timedel = post["duedate"] - datetime.now()
-            if timedel.seconds < 0:
-                await ctx.send("Deleted: " + post["class"] + " " + post["name"])
-                collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
 
 
 
