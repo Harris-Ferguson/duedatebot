@@ -155,9 +155,6 @@ class DueDates(commands.Cog):
     async def before_track_dates(self):
         await self.bot.wait_until_ready()
 
-
-
-
 def setup(bot):
     b = DueDates(bot)
     bot.add_cog(b)

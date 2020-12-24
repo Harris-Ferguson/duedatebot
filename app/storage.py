@@ -75,10 +75,21 @@ class Storage(commands.Cog):
         return dates
 
     async def update_date(self, guild, a_id, duedate):
+        """
+        Updates the due date of a given post
+        :param guild: guild id the post belongs to
+        :param a_id: assingment id of the post
+        :param duadate: the new duedate for the post
+        """
         result = collection.update_one({"a_id":a_id, "guild":guild}, {"$set":{"duedate":duedate}})
         print("Updated {0}".format(result.inserted_id))
 
     async def delete_post(self, guild, a_id):
+        """
+        Deletes a post
+        :param guild: guild id the post belongs to
+        :param a_id: assingment id of the post
+        """
         result = collection.delete_one({"guild":guild, "a_id":a_id})
 
     def is_past_due(self, post):
@@ -125,7 +136,19 @@ class Storage(commands.Cog):
                 handins = []
             await add_date(ctx, row['class'], row['name'], row['date'], *handins)
 
+
+    # reminders now only send out a string with the name of the reminder, we need a way to
+    # give an action to do at each time interval as well
     async def add_reminder(self, guild, channel, time, interval, unit, name):
+        """
+        Adds a reminder to the database
+        :param guild: guild id
+        :param channel: channel id to send the reminder to
+        :param time: the time in the future to remind at
+        :param interval: the interval to remind at, updated whenever the time is in the past
+        :param unit: the unit of time
+        :param name: name of the reminder
+        """
         reminder_data = {
             "guild":guild,
             "channel":channel,
@@ -138,10 +161,18 @@ class Storage(commands.Cog):
         print('One post:{0}'.format(result.inserted_id))
 
     async def clear_reminders(self, guild):
+        """
+        Clears all the reminders from the database
+        """
         for reminder in reminders.find({"guild":guild}):
             reminders.delete_one({"name": reminder["name"], "guild":guild})
 
     async def get_reminders(self, guild):
+        """
+        Gets the Reminders for a given guild
+        :param guild: guild id to get the reminders for
+        :return: a list of reminders
+        """
         remind = []
         for reminder in reminders.find({"guild", guild}):
             remind.append(reminder)
