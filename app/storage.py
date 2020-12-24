@@ -28,7 +28,7 @@ class Storage(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def add_date(self, ctx, course, name, duedate, handins):
+    async def add_post(self, ctx, course, name, duedate, handins):
         """
         Adds a new due date posting to the database
         :param ctx: discord ctx object from the command invocation
@@ -64,9 +64,12 @@ class Storage(commands.Cog):
         print('One post:{0}'.format(result.inserted_id))
         return a_id
 
-    async def list_due(self, ctx):
+    async def get_posts(self, guild):
+        """
+        Retrieves all the posts for a given guild.id
+        :param guild: the guild id of the guild to retrieve the posts of
+        """
         dates = []
-        guild = ctx.guild.id
         for post in collection.find({"guild": guild}):
             dates.append(post)
         return dates

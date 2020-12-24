@@ -37,33 +37,28 @@ class DueDates(commands.Cog):
                 await ctx.send("Due date could not be parsed")
                 return
 
-        a_id = await self.storage.add_date(ctx, arg1, arg2, duedatetime, arg4)
+        a_id = await self.storage.add_post(ctx, arg1, arg2, duedatetime, arg4)
         await ctx.send("```Added Due Date for: " + arg2 + "\nClass:  " + arg1 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nAssignment ID: " + str(a_id) + "\n```" )
 
     @commands.command(name="dates", help="Lists all due dates")
     async def listalldue(self, ctx):
-        posts = await self.storage.list_due(ctx)
+        posts = await self.storage.get_posts(ctx.guild.id)
         for post in posts:
             await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="datesforclass", help="Lists all the due dates for a specified course")
     async def listduefor(self, ctx, arg1):
-        posts = await self.storage.list_due(ctx)
+        posts = await self.storage.get_posts(ctx.guild.id)
         for post in posts:
             if post["class"] == arg1:
                 await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="duetoday", help="Lists everything due today")
     async def todaydue(self, ctx):
-        dates = []
-        guild = ctx.guild.id
-        currenttime = ctx.message.created_at
-        for post in collection.find({"guild": guild}):
-            if post["duedate"].date() == currenttime.date():
-                dates.append(helpers.build_output_string(post))
-
-        for date in dates:
-            await ctx.send(date)
+        posts = self.storage.get_posts(ctx.guild.id)
+        for post in posts:
+            if post["duedate"].date() == ctx.message.created_at.date():
+                await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="deletepastdue", help="Deletes all assignments that are past due", hidden="True")
     async def remove_past_due(self, ctx):
