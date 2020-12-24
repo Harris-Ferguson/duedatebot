@@ -5,7 +5,7 @@ import time
 import json
 from pymongo import MongoClient
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import hashlib
 import asyncio
@@ -22,6 +22,7 @@ class DueDatesCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.track_dates.start()
 
     @commands.command()
     async def on_command_error(self, ctx, error):
@@ -225,19 +226,17 @@ class DueDatesCog(commands.Cog):
             await ctx.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
             str(reminder["interval"]) +" " + reminder["unit"] +"\nTo Channel:" + ctx.guild.get_channel(reminder["channel"]).name + "\n```")
 
-    async def self_loop(self):
-        while self is self.bot.get_cog("DueDatesCog"):
-            # only do this if we are connected!
-            if self.bot.guilds:
-                print("checking reminders")
-                await helpers.check_reminders(self)
-                print("checking past due")
-                await helpers.check_for_past_due()
-            await asyncio.sleep(10)
+    @tasks.loop(seconds=30.0)
+    async def track_dates(self):
+        print("Checking Reminders")
+        await helpers.check_reminders(self)
+        print("Checking for Past Due Posts")
+        await helpers.check_for_past_due()
 
+    @track_dates.before_loop
+    async def before_track_dates(self):
+        await self.bot.wait_until_ready()
 
 def setup(bot):
     b = DueDatesCog(bot)
-    eloop = asyncio.get_event_loop()
-    eloop.create_task(b.self_loop())
     bot.add_cog(b)
