@@ -42,19 +42,16 @@ class DueDates(commands.Cog):
 
     @commands.command(name="dates", help="Lists all due dates")
     async def listalldue(self, ctx):
-        dates = await self.storage.list_due(ctx)
-        for date in dates:
-            await ctx.send(date)
+        posts = await self.storage.list_due(ctx)
+        for post in posts:
+            await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="datesforclass", help="Lists all the due dates for a specified course")
     async def listduefor(self, ctx, arg1):
-        dates = []
-        guild = ctx.guild.id
-        for post in collection.find({"guild": guild ,"class":arg1}):
-            dates.append(helpers.build_output_string(post))
-
-        for date in dates:
-            await ctx.send(date)
+        posts = await self.storage.list_due(ctx)
+        for post in posts:
+            if post["class"] == arg1:
+                await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="duetoday", help="Lists everything due today")
     async def todaydue(self, ctx):

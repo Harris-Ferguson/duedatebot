@@ -68,7 +68,7 @@ class Storage(commands.Cog):
         dates = []
         guild = ctx.guild.id
         for post in collection.find({"guild": guild}):
-            dates.append(helpers.build_output_string(post))
+            dates.append(post)
         return dates
 
     async def bulk_add(self, reader):
