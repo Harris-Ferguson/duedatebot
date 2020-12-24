@@ -71,7 +71,6 @@ class DueDates(commands.Cog):
 
     @commands.command(name="changeduedate", help="Changes the due date of an assigment \narg1: assigment id \narg2: new date with format: MON D YYYY HH:MM \nEXAMPLE: Jun 1 2020 18:02 (time is optional)" )
     async def change_due_date(self, ctx, arg1: int, arg2):
-        guild = ctx.guild.id
         try:
             duedatetime = datetime.strptime(arg2, '%b %d %Y %H:%M')
         except ValueError:
@@ -89,9 +88,9 @@ class DueDates(commands.Cog):
 
     @commands.command(name="duethisweek", help="Lists everything due in the next seven days")
     async def due_this_week(self, ctx):
-        guild = ctx.guild.id
+        posts = await self.storage.get_posts(ctx.guild.id)
         time = ctx.message.created_at
-        for post in collection.find({"guild":guild}):
+        for post in posts:
             timetilldue = post["duedate"] - time
             if timetilldue.days <= 7:
                 await ctx.send(helpers.build_output_string(post))
