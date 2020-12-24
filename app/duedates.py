@@ -80,10 +80,12 @@ class DueDates(commands.Cog):
             except:
                 await ctx.send("Due date could not be parsed")
                 return
-
-        collection.update_one({"a_id":arg1, "guild":guild}, {"$set":{"duedate":duedatetime}})
-        for post in collection.find({"guild":guild, "a_id":arg1}):
-            await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
+        await self.storage.update_date(ctx.guild.id, arg1, duedatetime)
+        await ctx.send("```Updated Assignment with ID {0}```".format(arg1))
+        posts = self.storage.get_posts(ctx.guild.id)
+        for post in posts:
+            if post["a_id"] == arg1:
+                await ctx.send(helpers.build_output_string(post))
 
     @commands.command(name="duethisweek", help="Lists everything due in the next seven days")
     async def due_this_week(self, ctx):
