@@ -76,7 +76,7 @@ class Storage(commands.Cog):
 
     async def update_date(self, guild, a_id, duedate):
         result = collection.update_one({"a_id":a_id, "guild":guild}, {"$set":{"duedate":duedate}})
-        print(result.raw_result)
+        print("Updated {0}".format(result.inserted_id))
 
     async def bulk_add(self, reader):
         duedates = self.bot.get_cog('DueDates')

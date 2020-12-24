@@ -60,15 +60,6 @@ class DueDates(commands.Cog):
             if post["duedate"].date() == ctx.message.created_at.date():
                 await ctx.send(helpers.build_output_string(post))
 
-    @commands.command(name="deletepastdue", help="Deletes all assignments that are past due", hidden="True")
-    async def remove_past_due(self, ctx):
-        guild = ctx.guild.id
-        for post in collection.find({"guild":guild}):
-            timedel = post["duedate"] - datetime.now()
-            if timedel.seconds < 0:
-                await ctx.send("Deleted: " + post["class"] + " " + post["name"])
-                collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
-
     @commands.command(name="changeduedate", help="Changes the due date of an assigment \narg1: assigment id \narg2: new date with format: MON D YYYY HH:MM \nEXAMPLE: Jun 1 2020 18:02 (time is optional)" )
     async def change_due_date(self, ctx, arg1: int, arg2):
         try:
@@ -105,9 +96,9 @@ class DueDates(commands.Cog):
 
     @commands.command(name="show", help="returns how long till the given assignment is due. \narg1: class \narg2: name", aliases=["daystilldue"])
     async def days_till_due(self, ctx, arg1, arg2):
-        guild = ctx.guild.id
+        posts = await self.storage.get_posts(ctx.guild.id)
         time = ctx.message.created_at
-        for post in collection.find({"guild":guild}):
+        for post in posts:
             if post["name"] == arg2 and post["class"] == arg1:
                 timetilldue = post["duedate"] - time
                 await ctx.send(helpers.build_output_string(post))
@@ -150,7 +141,6 @@ class DueDates(commands.Cog):
         response = requests.get(bulk_list_url)
         lines = response.text.splitlines()
         reader = csv.DictReader(lines)
-
         self.storage.bulk_add(reader)
 
     @tasks.loop(seconds=30.0)
@@ -163,6 +153,14 @@ class DueDates(commands.Cog):
     @track_dates.before_loop
     async def before_track_dates(self):
         await self.bot.wait_until_ready()
+
+    async def remove_past_due(self, ctx):
+        guild = ctx.guild.id
+        for post in collection.find({"guild":guild}):
+            timedel = post["duedate"] - datetime.now()
+            if timedel.seconds < 0:
+                await ctx.send("Deleted: " + post["class"] + " " + post["name"])
+                collection.delete_one({"guild":guild, "a_id": post["a_id"], "class": post["class"]})
 
 
 
