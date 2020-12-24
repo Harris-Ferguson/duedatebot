@@ -11,18 +11,14 @@ import hashlib
 import asyncio
 
 import helpers
+from storage import Storage
 
-DBPASS = os.getenv('DB_PASS')
-cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
-db = cluster["duedates"]
-collection = db["duedates"]
-reminders = db["reminders"]
-
-class DueDatesCog(commands.Cog):
+class DueDates(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
         self.track_dates.start()
+        self.storage = Storage(bot)
 
     @commands.command()
     async def on_command_error(self, ctx, error):
@@ -41,45 +37,12 @@ class DueDatesCog(commands.Cog):
                 await ctx.send("Due date could not be parsed")
                 return
 
-        guild = ctx.guild.id
-
-        #Generate the handins list
-        handins = []
-        if len(arg4) is 0:
-            handins.append("None!")
-        else:
-            for arg in arg4:
-                handins.append(arg)
-
-        s = arg1 + arg2 + str(guild)
-        #Generate the assignment id of 4 digits by hashing the assignment name
-        a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**4
-
-        #add the new assignment to the database
-        post_data = {
-            'guild': guild,
-            'name': arg2,
-            'class': arg1,
-            'a_id': a_id,
-            'duedate': duedatetime,
-            'handins': handins
-        }
-        result = collection.insert_one(post_data)
-        print('One post:{0}'.format(result.inserted_id))
-
-        handinstring = ""
-        for handin in handins:
-            handinstring += "-" + handin + "\n"
-
-        await ctx.send("```Added Due Date for: " + arg2 + "\nClass:  " + arg1 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nHand-ins:\n " + handinstring + "\nAssignment ID: " + str(a_id) + "\n```" )
+        a_id = await self.storage.add_date(ctx, arg1, arg2, duedatetime, arg4)
+        await ctx.send("```Added Due Date for: " + arg2 + "\nClass:  " + arg1 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nAssignment ID: " + str(a_id) + "\n```" )
 
     @commands.command(name="dates", help="Lists all due dates")
     async def listalldue(self, ctx):
-        dates = []
-        guild = ctx.guild.id
-        for post in collection.find({"guild": guild}):
-            dates.append(helpers.build_output_string(post))
-
+        dates = await self.storage.list_due(ctx)
         for date in dates:
             await ctx.send(date)
 
@@ -104,39 +67,6 @@ class DueDatesCog(commands.Cog):
 
         for date in dates:
             await ctx.send(date)
-
-    @commands.command(name="addhandins", help="allows you to add a list of hand ins to a given due date item\narg1: Assignment ID\nArg2: Hand-ins to add")
-    async def addhandin(self, ctx, arg1: int, *arg2):
-        if len(arg2) is 0:
-            await ctx.send("```You didn't give any new hand-ins to add!```")
-            return
-        guild = ctx.guild.id
-        handins = []
-        db_handins = []
-
-        for post in collection.find({"guild":guild}):
-            if post["a_id"] == arg1:
-                db_handins = post['handins']
-                for handin in db_handins:
-                    if handin == "None!":
-                        pass
-                    else:
-                        handins.append(handin)
-                for arg in arg2:
-                    if arg not in db_handins:
-                        handins.append(arg)
-                collection.update_one({"a_id":arg1, "guild":guild}, {"$set":{"handins":handins}})
-        for post in collection.find({"guild":guild, "a_id":arg1}):
-            await ctx.send("```Updated!\n```" + helpers.build_output_string(post))
-
-    @commands.command(name="delete", help="Deletes an assigment by id \narg1: Assigment ID")
-    async def remove_hand_in(self, ctx, arg1: int):
-        guild = ctx.guild.id
-        result = collection.delete_one({"guild":guild, "a_id":arg1})
-        if result.deleted_count <= 0:
-            await ctx.send("```\nID not found!\n```")
-        else:
-            await ctx.send("```\nDeleted Assignment with id: " + str(arg1) + "\n```")
 
     @commands.command(name="deletepastdue", help="Deletes all assignments that are past due", hidden="True")
     async def remove_past_due(self, ctx):
@@ -212,19 +142,23 @@ class DueDatesCog(commands.Cog):
         print('One post:{0}'.format(result.inserted_id))
         await ctx.send("```\nAdded Reminder " + arg3 + " for every " + str(arg1) + " " + arg2 + "\n```")
 
-    @commands.command(name="removereminders", help="removes all reminders")
-    async def remove_reminders(self, ctx):
-        guild = ctx.guild.id
-        for reminder in reminders.find({"guild":guild}):
-            reminders.delete_one({"name":reminder["name"]})
-        await ctx.send("```\nRemoved all reminders!\n```")
-
     @commands.command(name="listreminders", help="lists all reminders")
     async def list_reminders(self, ctx):
         guild = ctx.guild.id
         for reminder in reminders.find({"guild":guild}):
             await ctx.send("```\nReminder: " + reminder["name"] + "\nInterval: " +
             str(reminder["interval"]) +" " + reminder["unit"] +"\nTo Channel:" + ctx.guild.get_channel(reminder["channel"]).name + "\n```")
+
+    @commands.command(name="bulkadd", help="bulkadds assignments from a csv attached to the command message\n CVS header format: class, name, date, handins\n handins should be a spaces seperated list")
+    async def bulk_add(self, ctx):
+        bulk_list_url = ""
+        for file in ctx.message.attachments:
+            bulk_list_url = file.url
+        response = requests.get(bulk_list_url)
+        lines = response.text.splitlines()
+        reader = csv.DictReader(lines)
+
+        self.storage.bulk_add(reader)
 
     @tasks.loop(seconds=30.0)
     async def track_dates(self):
@@ -237,6 +171,8 @@ class DueDatesCog(commands.Cog):
     async def before_track_dates(self):
         await self.bot.wait_until_ready()
 
+
+
 def setup(bot):
-    b = DueDatesCog(bot)
+    b = DueDates(bot)
     bot.add_cog(b)
