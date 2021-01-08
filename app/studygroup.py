@@ -17,7 +17,7 @@ cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.m
 db = cluster["duedates"]
 users = db["users"]
 
-class StudyGroupCog(commands.Cog):
+class StudyGroup(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
@@ -68,4 +68,4 @@ class StudyGroupCog(commands.Cog):
             await ctx.send('```fix\n' + user + ": " + str(mikes)  + '\n```')
 
 def setup(bot):
-    bot.add_cog(StudyGroupCog(bot))
+    bot.add_cog(StudyGroup(bot))
