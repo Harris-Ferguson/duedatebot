@@ -1,3 +1,10 @@
+"""
+Storage Cog Class
+
+This class interacts with the MongoDB database and has methods to store Posts,
+and Reminders.
+"""
+
 import os
 import pymongo
 from datetime import datetime
@@ -36,7 +43,8 @@ class Storage(commands.Cog):
         :param name: name of the posting
         :param duedate: datetime object representing the time due
         :param handins: list of hand-ins (strings)
-        :return: a_id of the resulting post
+        :return: a_id of the resulting post, -1 if the post already exists for a
+        given guild
         """
         #Generate the handins list
         guild = ctx.guild.id
@@ -51,7 +59,7 @@ class Storage(commands.Cog):
         # Generate the assignment id of 5 digits by hashing the assignment name
         a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**5
 
-        # return -1 so we can tell the user that this post does not exist
+        # return -1 so we dont create duplicates
         if await self.post_exists(guild, a_id):
             return -1
 

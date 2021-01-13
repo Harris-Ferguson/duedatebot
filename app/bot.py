@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 import hashlib
 
 import helpers
+"""
+    Bot entry point. Loads all the cogs into the bot then starts the bot
+"""
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')

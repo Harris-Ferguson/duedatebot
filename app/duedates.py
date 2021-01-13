@@ -1,3 +1,14 @@
+"""
+Duedates Cog Class
+
+This class listens for commands by using the discord commands module and delegates
+the intended task to the other appropriate objects
+
+This class also periodically checks for past due dates and removes them from the
+database. This class asscomplishes this by using a background task, which is
+part of the discord.py tasks module
+"""
+
 import os
 import pymongo
 from datetime import datetime
