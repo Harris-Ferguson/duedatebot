@@ -38,8 +38,10 @@ class DueDates(commands.Cog):
             except:
                 await ctx.send("Due date could not be parsed")
                 return
-
         a_id = await self.storage.add_post(ctx, arg1, arg2, duedatetime, arg4)
+        if a_id == -1:
+            await ctx.send("```This Assignment already exists!```")
+            return
         await ctx.send("```Added Due Date for: " + arg2 + "\nClass:  " + arg1 + "\nDue on: " + duedatetime.strftime('%b %d %Y') + "\nAssignment ID: " + str(a_id) + "\n```" )
 
     @commands.command(name="dates", help="Lists all due dates")

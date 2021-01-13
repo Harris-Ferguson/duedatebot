@@ -50,9 +50,10 @@ class Storage(commands.Cog):
         s = course + name + str(guild)
         # Generate the assignment id of 5 digits by hashing the assignment name
         a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**5
-        # prevent collisions by incrementing
-        while (not self.post_exists(a_id)):
-            a_id = a_id + 1
+
+        # return -1 so we can tell the user that this post does not exist
+        if await self.post_exists(guild, a_id):
+            return -1
 
         #add the new assignment to the database
         post_data = {
@@ -67,13 +68,13 @@ class Storage(commands.Cog):
         print('One post:{0}'.format(result.inserted_id))
         return a_id
 
-    def post_exists(self, guild, a_id):
+    async def post_exists(self, guild, a_id):
         """
         Checks if a post with a given a_id exists in the database
         :param guild: int guild id to check existence for
         :param a_id: int a_id to check existence for
         """
-        posts = self.get_posts(guild)
+        posts = await self.get_posts(guild)
         for post in posts:
             if post['a_id'] == a_id:
                 return True
