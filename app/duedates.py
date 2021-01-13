@@ -9,6 +9,8 @@ from discord.ext import commands, tasks
 from dotenv import load_dotenv
 import hashlib
 import asyncio
+import requests
+import csv
 
 import helpers
 from storage import Storage
@@ -134,7 +136,13 @@ class DueDates(commands.Cog):
         response = requests.get(bulk_list_url)
         lines = response.text.splitlines()
         reader = csv.DictReader(lines)
-        self.storage.bulk_add(reader)
+        for row in reader:
+            if row['handins'] is not None:
+                handins = tuple(map(str, row['handins'].split()))
+            else:
+                handins = []
+            date = datetime.strptime(row['date'], "%b %d %Y %H:%M")
+            await self.storage.add_post(ctx, row['class'], row['name'], date, handins)
 
     @tasks.loop(seconds=30.0)
     async def track_dates(self):
