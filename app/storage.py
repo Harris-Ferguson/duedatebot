@@ -48,8 +48,11 @@ class Storage(commands.Cog):
                 handins_list.append(arg)
 
         s = course + name + str(guild)
-        #Generate the assignment id of 5 digits by hashing the assignment name
+        # Generate the assignment id of 5 digits by hashing the assignment name
         a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**5
+        # prevent collisions by incrementing
+        while (not self.post_exists(a_id)):
+            a_id = a_id + 1
 
         #add the new assignment to the database
         post_data = {
@@ -63,6 +66,18 @@ class Storage(commands.Cog):
         result = collection.insert_one(post_data)
         print('One post:{0}'.format(result.inserted_id))
         return a_id
+
+    def post_exists(self, guild, a_id):
+        """
+        Checks if a post with a given a_id exists in the database
+        :param guild: int guild id to check existence for
+        :param a_id: int a_id to check existence for
+        """
+        posts = self.get_posts(guild)
+        for post in posts:
+            if post['a_id'] == a_id:
+                return True
+        return False
 
     async def get_posts(self, guild):
         """
@@ -106,7 +121,7 @@ class Storage(commands.Cog):
         """
         for post in collection.find():
             if self.is_past_due(post):
-                self.delete_post(post["guild"], post["a_id"])
+                await self.delete_post(post["guild"], post["a_id"])
 
     async def check_reminders(self):
         """
