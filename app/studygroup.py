@@ -23,9 +23,10 @@ class StudyGroup(commands.Cog):
         self.bot = bot
 
     @commands.command(name="mike", help="just for fun")
+    @commands.cooldown(3, 60, commands.BucketType.user)
     async def mike(self, ctx):
-        guildname = ctx.guild.name
-        if guildname == "CMPT Study Groups":
+        guild_id = ctx.guild.id
+        if guild_id == 750992924539486275:
         # print the emoji first
             emojis = ctx.guild.emojis
             mikes = []
@@ -57,7 +58,10 @@ class StudyGroup(commands.Cog):
         print('Added User:{0}'.format(result.inserted_id))
 
     @commands.command(name="leaderboard", help="I was keeping track the whole time")
+    @commands.cooldown(1, 6000, commands.BucketType.guild)
+    @commands.has_permissions(administrator=True)
     async def top_5(self, ctx):
+        channel_name = ctx.channel.name
         await ctx.send("```\nMike Leaderboard!```")
         everyone = {}
         for user in users.find({"guild":ctx.guild.id}):
