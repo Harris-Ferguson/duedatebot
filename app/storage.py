@@ -41,15 +41,15 @@ class Storage(commands.Cog):
         #Generate the handins list
         guild = ctx.guild.id
         handins_list = []
-        if len(handins) is 0:
+        if len(handins) == 0:
             handins_list.append("None!")
         else:
             for handin in handins:
                 handins_list.append(arg)
 
         s = course + name + str(guild)
-        #Generate the assignment id of 4 digits by hashing the assignment name
-        a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**4
+        #Generate the assignment id of 5 digits by hashing the assignment name
+        a_id = int(hashlib.sha256(s.encode('utf-8')).hexdigest(), 16) % 10**5
 
         #add the new assignment to the database
         post_data = {
@@ -106,7 +106,7 @@ class Storage(commands.Cog):
         """
         for post in collection.find():
             if self.is_past_due(post):
-                self.delete_one(post["guild"], post["a_id"])
+                self.delete_post(post["guild"], post["a_id"])
 
     async def check_reminders(self):
         """
@@ -126,16 +126,6 @@ class Storage(commands.Cog):
                 futuretime = int(currenttime + (reminder["interval"] * quantity_multiplier))
                 reminders.update_one({"guild":reminder["guild"],"name":reminder["name"]}, {"$set":{"time":futuretime}})
         return past
-
-    async def bulk_add(self, reader):
-        duedates = self.bot.get_cog('DueDates')
-        for row in reader:
-            if row['handins'] is not None:
-                handins = tuple(map(str, row['handins'].split()))
-            else:
-                handins = []
-            await add_date(ctx, row['class'], row['name'], row['date'], *handins)
-
 
     # reminders now only send out a string with the name of the reminder, we need a way to
     # give an action to do at each time interval as well
