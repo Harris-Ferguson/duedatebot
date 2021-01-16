@@ -88,7 +88,7 @@ class StudyGroup(commands.Cog):
         response = requests.get(self.chess_url + "puzzle")
         if response.status_code == 200:
             content = response.json()
-            output = content["title"] + "\n Chess.com link: " + content["url"]
+            output = content["title"] + "\n Chess.com link: <" + content["url"] +">"
             fen = content["fen"]
             board = chess.Board(fen)
             boardsvg = chess.svg.board(board=board)
