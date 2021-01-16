@@ -9,8 +9,14 @@ import os
 from pymongo import MongoClient
 from operator import itemgetter
 import operator
+import requests
 
 import helpers
+
+# this needs to be rewritten to use the new storage object, but its
+# not part of the bot "proper", rather its a set of fun commands for our
+# specific study group / school discord, so its not a huge deal if its not
+# strict
 
 DBPASS = os.getenv('DB_PASS')
 cluster = MongoClient("mongodb+srv://duckypotato:" + DBPASS + "@cluster0.bore2.mongodb.net/duedates?retryWrites=true&w=majority")
@@ -21,6 +27,7 @@ class StudyGroup(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.chess_url = "https://api.chess.com/pub/"
 
     @commands.command(name="mike", help="just for fun")
     @commands.cooldown(3, 60, commands.BucketType.user)
@@ -70,6 +77,14 @@ class StudyGroup(commands.Cog):
         leaderboard = dict(sorted(everyone.items(), key=operator.itemgetter(1), reverse=True))
         for user, mikes in leaderboard.items():
             await ctx.send('```fix\n' + user + ": " + str(mikes)  + '\n```')
+
+    @commands.command(name="puzzle", help="chess.com daily puzzle")
+    async def puzzle(self, ctx):
+        response = requests.get(self.chess_url + "puzzle")
+        if response.status_code == 200:
+            content = response.json()
+            output = content["title"] + "\n" + content["url"]
+            await ctx.send(output)
 
 def setup(bot):
     bot.add_cog(StudyGroup(bot))
