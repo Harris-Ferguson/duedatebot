@@ -10,6 +10,9 @@ from pymongo import MongoClient
 from operator import itemgetter
 import operator
 import requests
+import chess
+import chess.svg
+import sys
 
 import helpers
 
@@ -83,8 +86,15 @@ class StudyGroup(commands.Cog):
         response = requests.get(self.chess_url + "puzzle")
         if response.status_code == 200:
             content = response.json()
-            output = content["title"] + "\n" + content["url"]
+            output = content["title"] + "\n Chess.com link: " + content["url"]
+            fen = content["fen"]
+            board = chess.Board(fen)
+            boardsvg = chess.svg.board(board=board)
+            f = open("puzzleboard.svg", "w")
+            f.write(boardsvg)
+            f.close()
             await ctx.send(output)
+            await ctx.send(file=discord.File("puzzleboard.svg"))
 
 def setup(bot):
     bot.add_cog(StudyGroup(bot))
