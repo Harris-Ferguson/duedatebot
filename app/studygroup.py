@@ -13,6 +13,8 @@ import requests
 import chess
 import chess.svg
 import sys
+from svglib.svglib import svg2rlg
+from reportlab.graphics import renderPM
 
 import helpers
 
@@ -93,8 +95,10 @@ class StudyGroup(commands.Cog):
             f = open("puzzleboard.svg", "w")
             f.write(boardsvg)
             f.close()
+            drawing = svg2rlg("puzzleboard.svg")
+            renderPM.drawToFile(drawing, "puzzleboard.png", fmt="PNG")
             await ctx.send(output)
-            await ctx.send(file=discord.File("puzzleboard.svg"))
+            await ctx.send(file=discord.File("puzzleboard.png"))
 
 def setup(bot):
     bot.add_cog(StudyGroup(bot))
